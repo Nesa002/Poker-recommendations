@@ -1,12 +1,12 @@
 package com.ftn.sbnz.service.services;
 
 
+import com.ftn.sbnz.model.models.Round;
 import org.kie.api.runtime.KieContainer;
 import org.kie.api.runtime.KieSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.ftn.sbnz.model.models.Round;
 
 @Service
 public class ActivateRulesService {

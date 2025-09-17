@@ -6,7 +6,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.kie.api.definition.type.Position;
 
 public class Round {
     //AA , KJS - King jack suit
