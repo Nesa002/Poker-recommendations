@@ -1,0 +1,104 @@
+package rules;
+
+import com.ftn.sbnz.model.models.Round;
+import com.ftn.sbnz.service.services.HandService;
+
+global HandService handService;
+global double min_bigger_raise;        // u % pota
+global int min_bigger_raise_blinds;    // u blindovima
+global double risk_margin;             // za high stakes
+global int bad_position_treshold;
+global double min_strong_hand;
+global double min_medium_hand;
+global double tableAggressiveness;     // ∑agresivnosti stola
+
+// ================= High Stakes Raise =================
+rule "High Stakes Strong Hand"
+when
+    $r: Round()
+
+    eval($r.getCurrentRaise() > (min_bigger_raise * $r.getPot()) && $r.getCurrentRaise() >= min_bigger_raise_blinds)
+    eval(handService.getWinPercentage($r.getHand()) >= (100 - risk_margin))
+then
+    System.out.println("Action: RAISE (High stake, strong hand)");
+end
+
+rule "High Stakes Good Position Economy"
+when
+    $r: Round()
+
+    eval($r.getCurrentRaise() > (min_bigger_raise * $r.getPot()) && $r.getCurrentRaise() >= min_bigger_raise_blinds)
+    eval($r.getPlayerPosition() > bad_position_treshold)
+    eval(($r.getStrongEconomy() || handService.getTableAggressiveness($r.getRoundNum()) > 0) && handService.getWinPercentage($r.getHand()) > min_strong_hand) // tableAggressiveness > 0
+then
+    System.out.println("Action: RAISE (High stake, good position, strong hand/economy)");
+end
+
+rule "High Stakes Bad Position"
+when
+    $r: Round()
+    
+    eval($r.getCurrentRaise() > (min_bigger_raise * $r.getPot()) && $r.getCurrentRaise() >= min_bigger_raise_blinds)
+    eval($r.getPlayerPosition() <= bad_position_treshold)
+    eval($r.getStrongEconomy() && handService.getWinPercentage($r.getHand()) > min_strong_hand)
+then
+    System.out.println("Action: RAISE (High stake, bad position, strong hand/economy)");
+end
+
+rule "High Stakes Call Fallback"
+salience -10
+when
+    $r: Round()
+    eval($r.getCurrentRaise() > (min_bigger_raise * $r.getPot()) && $r.getCurrentRaise() >= min_bigger_raise_blinds)
+then
+    System.out.println("Action: CALL (High stakes fallback)");
+end
+
+// ================= Normal Stakes Raise =================
+// rule "Normal Stakes Strong Hand"
+// when
+//     $r: Round()
+//     eval(!(currentRaise > (min_bigger_raise * potSize) || currentRaise >= min_bigger_raise_blinds))
+//     eval(handStrength >= (100 - risk_margin))
+// then
+//     System.out.println("Action: RAISE (Strong hand, normal stakes)");
+// end
+
+// rule "Normal Stakes Good Position Medium Hand"
+// when
+//     $r: Round()
+//     eval(!(currentRaise > (min_bigger_raise * potSize) || currentRaise >= min_bigger_raise_blinds))
+//     eval($r.getPlayerPosition() > bad_position_treshold)
+//     eval((strongEconomy || tableAggressiveness > 0) && handStrength > min_medium_hand)
+// then
+//     System.out.println("Action: RAISE (Good position, medium hand, normal stakes)");
+// end
+
+// rule "Normal Stakes Good Position Strong Hand"
+// when
+//     $r: Round()
+//     eval(!(currentRaise > (min_bigger_raise * potSize) || currentRaise >= min_bigger_raise_blinds))
+//     eval($r.getPlayerPosition() > bad_position_treshold)
+//     eval(handStrength > min_strong_hand)
+// then
+//     System.out.println("Action: RAISE (Good position, strong hand, normal stakes)");
+// end
+
+// rule "Normal Stakes Bad Position"
+// when
+//     $r: Round()
+//     eval(!(currentRaise > (min_bigger_raise * potSize) || currentRaise >= min_bigger_raise_blinds))
+//     eval($r.getPlayerPosition() <= bad_position_treshold)
+//     eval((strongEconomy || tableAggressiveness > 0) && handStrength > min_strong_hand)
+// then
+//     System.out.println("Action: RAISE (Bad position, strong hand/economy, normal stakes)");
+// end
+
+// rule "Normal Stakes Call Fallback"
+// salience -10
+// when
+//     $r: Round()
+//     eval(!(currentRaise > (min_bigger_raise * potSize) || currentRaise >= min_bigger_raise_blinds))
+// then
+//     System.out.println("Action: CALL (Normal stakes fallback)");
+// end

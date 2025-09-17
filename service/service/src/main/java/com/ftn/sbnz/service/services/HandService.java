@@ -17,7 +17,7 @@ public class HandService {
     private final Map<String, Double> handWinPct = new HashMap<>();
 
     // Path to your file (can be absolute or classpath resource)
-    private final String fileName = "poker_hands.txt";
+    private final String fileName = "service\\service\\src\\main\\resources\\poker_hands.txt";
 
     @PostConstruct
     public void init() {
@@ -49,6 +49,10 @@ public class HandService {
     public Double getWinPercentage(String hand) {
         if (hand == null) return 0.0;
         return handWinPct.getOrDefault(hand.toUpperCase(), 0.0);
+    }
+
+    public Double getTableAggressiveness(String hand) {
+        return 1.0;
     }
 
     // Optional: get all hands
