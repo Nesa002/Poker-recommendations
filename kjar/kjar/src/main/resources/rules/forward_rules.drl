@@ -4,16 +4,18 @@ import com.ftn.sbnz.model.models.Round;
 import com.ftn.sbnz.service.services.HandService;
 
 global HandService handService;
-global double min_bigger_raise;        // u % pota
-global int min_bigger_raise_blinds;    // u blindovima
-global double risk_margin;             // za high stakes
-global int bad_position_treshold;
-global double min_strong_hand;
-global double min_medium_hand;
-global double tableAggressiveness;     // ∑agresivnosti stola
+global Double min_bigger_raise;        // u % pota
+global Integer min_bigger_raise_blinds;    // u blindovima
+global Double risk_margin;             // za high stakes
+global Integer bad_position_treshold;
+global Double min_strong_hand;
+global Double min_medium_hand;
+global Double tableAggressiveness;     // ∑agresivnosti stola
 
 // ================= High Stakes Raise =================
 rule "High Stakes Strong Hand"
+activation-group "high_stakes"
+salience 10
 when
     $r: Round()
 
@@ -24,6 +26,8 @@ then
 end
 
 rule "High Stakes Good Position Economy"
+activation-group "high_stakes"
+salience 9
 when
     $r: Round()
 
@@ -35,6 +39,8 @@ then
 end
 
 rule "High Stakes Bad Position"
+activation-group "high_stakes"
+salience 8
 when
     $r: Round()
     
@@ -46,6 +52,7 @@ then
 end
 
 rule "High Stakes Call Fallback"
+activation-group "high_stakes"
 salience -10
 when
     $r: Round()

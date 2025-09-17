@@ -51,7 +51,7 @@ public class HandService {
         return handWinPct.getOrDefault(hand.toUpperCase(), 0.0);
     }
 
-    public Double getTableAggressiveness(String hand) {
+    public Double getTableAggressiveness(int hand) {
         return 1.0;
     }
 
