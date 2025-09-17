@@ -15,7 +15,7 @@
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
       <module name="kjar" options="-parameters" />
-      <module name="model" options="-parameters" />
+      <module name="model" options="" />
       <module name="service" options="-parameters" />
     </option>
   </component>
