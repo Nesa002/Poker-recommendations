@@ -1,2 +1,14 @@
-<kmodule xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://jboss.org/kie/6.0.0/kmodule">
+<kmodule xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns="http://jboss.org/kie/6.0.0/kmodule">
+
+    <!-- KieBase za backward chaining -->
+    <kbase name="backwardRulesBase" packages="rules.backward">
+        <ksession name="backwardRulesSession"/>
+    </kbase>
+
+    <!-- KieBase za forward chaining -->
+    <kbase name="forwardRulesBase" packages="rules.forward">
+        <ksession name="forwardRulesSession"/>
+    </kbase>
+
 </kmodule>

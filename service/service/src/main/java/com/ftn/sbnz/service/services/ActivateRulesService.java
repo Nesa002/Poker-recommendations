@@ -23,7 +23,7 @@ public class ActivateRulesService {
   }
 
   public void fireRules() {
-    KieSession kSession = kieContainer.newKieSession();
+    KieSession kSession = kieContainer.newKieSession("forwardRulesSession");
     try {
         // Inject your HandService into the DRL as global
         kSession.setGlobal("handService", handService);
