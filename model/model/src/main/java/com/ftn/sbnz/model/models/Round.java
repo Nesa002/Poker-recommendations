@@ -18,6 +18,7 @@ public class Round {
     private int playerPosition;
     private String playerName;
 
+
     // prati akcije igraca
     private Map<String, List<Integer>> playerActions = new HashMap<>();
 
@@ -122,6 +123,14 @@ public class Round {
         int maxChips = Collections.max(this.playerChips.values());
 
         return this.playerChips.get(this.playerName).equals(maxChips);
+    }
+    
+    public String getPlayerName() {
+        return playerName;
+    }
+
+    public void setPlayerName(String playerName) {
+        this.playerName = playerName;
     }
 
     @Override

@@ -2,8 +2,8 @@
          xmlns="http://jboss.org/kie/6.0.0/kmodule">
 
     <!-- KieBase za backward chaining -->
-    <kbase name="backwardRulesBase" packages="rules.backward">
-        <ksession name="backwardRulesSession"/>
+    <kbase name="foldRulesBase" packages="rules.fold">
+        <ksession name="foldRulesSession"/>
     </kbase>
 
     <!-- KieBase za forward chaining -->

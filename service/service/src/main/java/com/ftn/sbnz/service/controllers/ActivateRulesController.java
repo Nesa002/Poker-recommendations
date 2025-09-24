@@ -18,8 +18,13 @@ public class ActivateRulesController {
         this.service = service;
     }
 
-    @GetMapping("")
+    @GetMapping("/forward")
     public void fireAllRules() {
         service.fireRules();
+    }
+
+    @GetMapping("/backwards")
+    public void fireAllRulesBackwards() {
+        service.fireRulesBackwards();
     }
 }
