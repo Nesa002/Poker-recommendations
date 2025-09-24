@@ -22,4 +22,9 @@ public class ActivateRulesController {
     public void fireAllRules() {
         service.fireRules();
     }
+
+    @GetMapping("/generate-rules")
+    public void generateRules() {
+        service.generateRules();
+    }
 }

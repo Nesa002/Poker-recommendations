@@ -1,0 +1,54 @@
+
+rule "HighStakesStrongHand"
+activation-group "high_stakes"
+salience 10
+when
+    $r: Round()
+    eval($r.getCurrentRaise() > (min_bigger_raise * $r.getPot())
+         && $r.getCurrentRaise() >= min_bigger_raise_blinds)
+
+    eval(handService.getWinPercentage($r.getHand()) >= (100 - risk_margin))
+then
+    System.out.println("Action: RAISE (High stake");
+end
+
+rule "HighStakesGoodPositionEconomy"
+activation-group "high_stakes"
+salience 9
+when
+    $r: Round()
+    eval($r.getCurrentRaise() > (min_bigger_raise * $r.getPot())
+         && $r.getCurrentRaise() >= min_bigger_raise_blinds)
+    eval($r.getPlayerPosition() > bad_position_treshold)
+    eval(($r.getStrongEconomy() || handService.getTableAggressiveness($r.getRoundNum()) > 0) && handService.getWinPercentage($r.getHand()) > min_strong_hand)
+then
+    System.out.println("Action: RAISE (High stake");
+end
+
+rule "HighStakesBadPosition"
+activation-group "high_stakes"
+salience 8
+when
+    $r: Round()
+    eval($r.getCurrentRaise() > (min_bigger_raise * $r.getPot())
+         && $r.getCurrentRaise() >= min_bigger_raise_blinds)
+    eval($r.getPlayerPosition() <= bad_position_treshold)
+    eval($r.getStrongEconomy() && handService.getWinPercentage($r.getHand()) > min_strong_hand)
+then
+    System.out.println("Action: RAISE (High stake");
+end
+
+rule "HighStakesCallFallback"
+activation-group "high_stakes"
+salience -10
+when
+    $r: Round()
+    eval($r.getCurrentRaise() > (min_bigger_raise * $r.getPot())
+         && $r.getCurrentRaise() >= min_bigger_raise_blinds)
+
+
+then
+    System.out.println("Action: CALL (High stakes fallback)");
+end
+
+
