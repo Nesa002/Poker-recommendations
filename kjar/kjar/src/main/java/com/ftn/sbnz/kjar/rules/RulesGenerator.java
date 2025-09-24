@@ -40,8 +40,6 @@ public class RulesGenerator {
                 CSVFormat.DEFAULT.builder()
                         .setHeader()
                         .setSkipHeaderRecord(true)
-                        .setIgnoreSurroundingSpaces(true)
-                        .setTrim(true)
                         .build())) {
 
             for (CSVRecord record : parser) {
@@ -49,6 +47,7 @@ public class RulesGenerator {
                 for (String header : parser.getHeaderMap().keySet()) {
                     map.put(header, record.get(header));
                 }
+                System.out.println(map);
                 rulesData.add(map);
             }
         }

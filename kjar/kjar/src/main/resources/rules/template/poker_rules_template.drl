@@ -2,9 +2,10 @@ template header
 ruleName
 stakeLevel
 salience
-raiseCondition
-positionCondition
-handEconomyAggressivenessCondition
+raiseThreshold
+positionThreshold
+minWinPercentage
+requiresStrongEconomy
 action
 
 template "poker-rules"
@@ -14,10 +15,15 @@ activation-group "@{stakeLevel}"
 salience @{salience}
 when
     $r: Round()
-    eval($r.getCurrentRaise() @{raiseCondition} (min_bigger_raise * $r.getPot())
+    eval($r.getCurrentRaise() @{raiseThreshold} (min_bigger_raise * $r.getPot())
          && $r.getCurrentRaise() >= min_bigger_raise_blinds)
-    @{positionCondition}
-    @{handEconomyAggressivenessCondition}
+    @{(positionThreshold != null && positionThreshold.trim() != "") ? 
+    "eval($r.getPlayerPosition() > " + positionThreshold + ")" : 
+    ""}
+    @{(minWinPercentage != null && minWinPercentage.trim() != "") ? 
+        "eval(" + 
+        (requiresStrongEconomy == "true" ? "($r.getStrongEconomy() || handService.getTableAggressiveness($r.getRoundNum()) > 0) && " : "") + 
+        "handService.getWinPercentage($r.getHand()) >= " + minWinPercentage + ")" : ""}
 then
     System.out.println("Action: @{action}");
 end

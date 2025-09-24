@@ -1,5 +1,5 @@
-ruleName,stakeLevel,salience,raiseCondition,positionCondition,handEconomyAggressivenessCondition,action
-HighStakesStrongHand,high_stakes,10,>,,eval(handService.getWinPercentage($r.getHand()) >= (100 - risk_margin)),RAISE (High stake, strong hand)
-HighStakesGoodPositionEconomy,high_stakes,9,>,"eval($r.getPlayerPosition() > bad_position_treshold)","eval(($r.getStrongEconomy() || handService.getTableAggressiveness($r.getRoundNum()) > 0) && handService.getWinPercentage($r.getHand()) > min_strong_hand)",RAISE (High stake, good position, strong hand/economy)
-HighStakesBadPosition,high_stakes,8,>,"eval($r.getPlayerPosition() <= bad_position_treshold)","eval($r.getStrongEconomy() && handService.getWinPercentage($r.getHand()) > min_strong_hand)",RAISE (High stake, bad position, strong hand/economy)
-HighStakesCallFallback,high_stakes,-10,>,, ,CALL (High stakes fallback)
+ruleName,stakeLevel,salience,raiseThreshold,positionThreshold,minWinPercentage,requiresStrongEconomy,action
+HighStakesStrongHand,high_stakes,10,>, ,95,,RAISE (High stake, strong hand)
+HighStakesGoodPositionEconomy,high_stakes,9,>,3,80,true,RAISE (High stake, good position, strong hand/economy)
+HighStakesBadPosition,high_stakes,8,>,3,90,true,RAISE (High stake, bad position, strong hand/economy)
+HighStakesCallFallback,high_stakes,-10,>, , ,,CALL (High stakes fallback)
