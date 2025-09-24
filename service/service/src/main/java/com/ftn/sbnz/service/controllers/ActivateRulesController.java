@@ -27,4 +27,9 @@ public class ActivateRulesController {
     public void fireAllRulesBackwards() {
         service.fireRulesBackwards();
     }
+
+    @GetMapping("/generate-rules")
+    public void generateRules() {
+        service.generateRules();
+    }
 }

@@ -1,0 +1,25 @@
+template header
+ruleName
+stakeLevel
+salience
+raiseCondition
+positionCondition
+handEconomyAggressivenessCondition
+action
+
+template "poker-rules"
+
+rule "@{ruleName}"
+activation-group "@{stakeLevel}"
+salience @{salience}
+when
+    $r: Round()
+    eval($r.getCurrentRaise() @{raiseCondition} (min_bigger_raise * $r.getPot())
+         && $r.getCurrentRaise() >= min_bigger_raise_blinds)
+    @{positionCondition}
+    @{handEconomyAggressivenessCondition}
+then
+    System.out.println("Action: @{action}");
+end
+
+end template

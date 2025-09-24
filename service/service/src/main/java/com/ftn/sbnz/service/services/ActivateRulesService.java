@@ -1,6 +1,7 @@
 package com.ftn.sbnz.service.services;
 
 
+import com.ftn.sbnz.kjar.rules.RulesGenerator;
 import com.ftn.sbnz.model.models.Round;
 
 import java.util.Collection;
@@ -164,6 +165,15 @@ public class ActivateRulesService {
                 // Dispose of the session to clean up everything for the next round.
                 kSession.dispose();
             }
+        }
+    }
+    public void generateRules() {
+        try {
+            RulesGenerator.generateDRL();
+            System.out.println("DRL rules generated successfully!");
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException("Failed to generate DRL rules", e);
         }
     }
 }
