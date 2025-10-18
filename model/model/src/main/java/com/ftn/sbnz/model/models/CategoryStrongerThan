@@ -1,0 +1,38 @@
+package com.ftn.sbnz.model.models;
+
+import org.kie.api.definition.type.Position;
+
+public class CategoryStrongerThan {
+
+    @Position(0)
+    private String stronger; // npr. "Premium"
+    
+    @Position(1)
+    private String weaker;   // npr. "Strong"
+
+    public CategoryStrongerThan(String stronger, String weaker) {
+        this.stronger = stronger;
+        this.weaker = weaker;
+    }
+
+    // Getteri i Setteri
+    public String getStronger() { return stronger; }
+    public void setStronger(String stronger) { this.stronger = stronger; }
+    public String getWeaker() { return weaker; }
+    public void setWeaker(String weaker) { this.weaker = weaker; }
+
+    // equals() i hashCode() su OBAVEZNI
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        CategoryStrongerThan that = (CategoryStrongerThan) o;
+        return java.util.Objects.equals(stronger, that.stronger) &&
+               java.util.Objects.equals(weaker, that.weaker);
+    }
+
+    @Override
+    public int hashCode() {
+        return java.util.Objects.hash(stronger, weaker);
+    }
+}
