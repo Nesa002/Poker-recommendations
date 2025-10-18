@@ -11,4 +11,8 @@
         <ksession name="forwardRulesSession"/>
     </kbase>
 
+    <kbase name="cepRulesBase" packages="rules.cep" eventProcessingMode="stream">
+        <ksession name="cepRulesSession" type="stateful" clockType="realtime"/>
+    </kbase>
+
 </kmodule>

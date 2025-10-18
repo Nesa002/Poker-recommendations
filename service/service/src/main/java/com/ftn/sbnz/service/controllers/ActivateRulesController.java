@@ -1,21 +1,28 @@
 package com.ftn.sbnz.service.controllers;
 
+import java.util.Date;
+import java.util.concurrent.ThreadLocalRandom;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.ftn.sbnz.model.models.RaiseEvent;
 import com.ftn.sbnz.service.services.ActivateRulesService;
+import com.ftn.sbnz.service.services.HandService;
 
 @RestController
 @RequestMapping("/rule-example")
 public class ActivateRulesController {
   
     private ActivateRulesService service;
+    private HandService handService;
 
     @Autowired
-    public ActivateRulesController(ActivateRulesService service) {
+    public ActivateRulesController(ActivateRulesService service, HandService handService) {
         this.service = service;
+        this.handService = handService;
     }
 
     @GetMapping("/forward")
@@ -32,4 +39,29 @@ public class ActivateRulesController {
     public void generateRules() {
         service.generateRules();
     }
+
+    @GetMapping("/simulate-raise")
+    public void simulateRaiseEvents() {
+        int random = ThreadLocalRandom.current().nextInt(1, 7);
+
+        RaiseEvent raise = new RaiseEvent();
+        raise.setPlayerId("Player" + random);
+        raise.setAmount(50 + random * 10);
+        raise.setEventTime(new Date());
+
+        handService.getCepRulesSession().insert(raise);
+
+        handService.getCepRulesSession().fireAllRules();
+    }
+
+    @GetMapping("/aggressiveness")
+    public String getAggressiveness() {
+        handService.getCepRulesSession().fireAllRules();
+
+        boolean isAggressive = handService.getTableAggressiveness();
+
+        return isAggressive
+                ? "Table is aggressive! (CEP detected)"
+                : "Table is not aggressive.";
+    } 
 }

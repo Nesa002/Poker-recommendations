@@ -1,0 +1,31 @@
+package rules.cep;
+
+import java.util.List;
+import java.util.Date;
+import com.ftn.sbnz.model.models.RaiseEvent;
+import com.ftn.sbnz.model.models.TableAggressivenessEvent;
+
+declare RaiseEvent
+    @role(event)
+    @timestamp(eventTime)
+    playerId : String
+    amount : double
+    eventTime : java.util.Date
+end
+
+declare TableAggressivenessEvent
+    @role(event)
+    eventTime : java.util.Date
+    @expires(10m)
+end
+
+rule "Detect table aggression"
+when
+    $raises : List() from collect(
+        RaiseEvent() over window:time(10m)
+    )
+    eval($raises.size() >= 5)
+then
+    System.out.println(">>> RULE FIRED: Detected table aggression! Raises: " + $raises.size());
+    insert(new TableAggressivenessEvent(new Date()));
+end
