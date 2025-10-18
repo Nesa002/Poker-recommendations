@@ -11,4 +11,8 @@
         <ksession name="forwardRulesSession"/>
     </kbase>
 
+    <kbase name="handEval" packages="rules.hand_eval">
+        <ksession name="handEvalSession"/>
+    </kbase>
+
 </kmodule>

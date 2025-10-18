@@ -5,23 +5,21 @@ import org.kie.api.definition.type.Position;
 public class CategoryStrongerThan {
 
     @Position(0)
-    private String stronger; // npr. "Premium"
+    private String stronger; 
     
     @Position(1)
-    private String weaker;   // npr. "Strong"
+    private String weaker;
 
     public CategoryStrongerThan(String stronger, String weaker) {
         this.stronger = stronger;
         this.weaker = weaker;
     }
 
-    // Getteri i Setteri
     public String getStronger() { return stronger; }
     public void setStronger(String stronger) { this.stronger = stronger; }
     public String getWeaker() { return weaker; }
     public void setWeaker(String weaker) { this.weaker = weaker; }
 
-    // equals() i hashCode() su OBAVEZNI
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
