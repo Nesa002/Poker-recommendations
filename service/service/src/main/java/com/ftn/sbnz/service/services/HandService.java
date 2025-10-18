@@ -42,13 +42,13 @@ public class HandService {
                 handWinPct.put(hand, percentage);
                 
                 String category;
-                if (percentage >= 0.90) { // npr. 80%+
+                if (percentage >= 0.75) { // npr. 80%+
                     category = "Premium";
-                } else if (percentage >= 0.80) { // 65%-80%
+                } else if (percentage >= 0.60) { // 65%-80%
                     category = "Strong";
-                } else if (percentage >= 0.70) { // 50%-65%
+                } else if (percentage >= 0.50) { // 50%-65%
                     category = "Medium";
-                } else if (percentage >= 0.60) { // 30-50%
+                } else if (percentage >= 0.40) { // 30-50%
                     category = "Playable";
                 } else {
                     category = "Weak";

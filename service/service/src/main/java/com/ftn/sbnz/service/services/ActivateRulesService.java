@@ -35,7 +35,7 @@ public class ActivateRulesService {
         // Set the global parameters for your rules
         kSession.setGlobal("min_bigger_raise", 0.2);         // 20% of pot
         kSession.setGlobal("min_bigger_raise_blinds", 5);    // 5 blinds
-        kSession.setGlobal("risk_margin", 15.0);             // 15% margin
+        kSession.setGlobal("risk_margin", 0.15);             // 15% margin
         kSession.setGlobal("bad_position_treshold", 2);      // positions <= 3 considered bad
         kSession.setGlobal("min_strong_hand", 60.0);         // 60% hand strength
         kSession.setGlobal("min_medium_hand", 40.0);         // 40% hand strength
@@ -70,9 +70,6 @@ public class ActivateRulesService {
             kSession.insert(round);
             kSession.fireAllRules(); // only evaluates rules for this Round
         }
-
-        // Fire all rules
-        kSession.fireAllRules();
 
     } finally {
         kSession.dispose();
