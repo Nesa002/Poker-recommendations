@@ -3,7 +3,7 @@ HighStakesPremiumHand,high_stakes,10,>,>=,>,,Premium,,,RAISE,"RAISE (High stake,
 HighStakesGoodPositionStrongHand,high_stakes,9,>,>=,>,bad_position_treshold,Strong,,,RAISE,"RAISE (High stake, good position, strong hand)"
 HighStakesGoodPositionMediumHandEconomy,high_stakes,8,>,>=,>,bad_position_treshold,Medium,true,,RAISE,"RAISE (High stake, good position, medium hand with strong economy)"
 HighStakesGoodPositionMediumHandAggTable,high_stakes,7,>,>=,>,bad_position_treshold,Medium,,true,RAISE,"RAISE (High stake, good position, medium hand with aggressive table)"
-HighStakesBadPosition,high_stakes,6,>,>=,>,,Strong,true,,RAISE,"RAISE (High stake, bad position, strong hand/economy)"
+HighStakesBadPosition,high_stakes,6,>,>=,<=,bad_position_treshold,Strong,true,,RAISE,"RAISE (High stake, bad position, strong hand/economy)"
 HighStakesCallFallback,high_stakes,-10,>,>=,>,,,,,CALL,"CALL (High stakes fallback)"
 NormalStakesPremiumHand,normal_stakes,10,<=,<,>,,Premium,,,RAISE,"RAISE (Normal stake, premium hand)"
 NormalStakesGoodPositionEconomy,normal_stakes,9,<=,<,>,bad_position_treshold,,true,,RAISE,"RAISE (Normal stake, good position, strong economy)"
