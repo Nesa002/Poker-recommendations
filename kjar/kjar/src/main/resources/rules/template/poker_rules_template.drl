@@ -3,11 +3,13 @@ ruleName
 stakeLevel
 salience
 raiseThreshold
+stakesOperator
 positionThreshold
 handCategory
 requiresStrongEconomy
 requiresAggressiveTable
 action
+log
 
 template "poker-rules"
 
@@ -16,13 +18,18 @@ activation-group "@{stakeLevel}"
 salience @{salience}
 when
     $r: Round()
-    eval($r.getCurrentRaise() @{raiseThreshold} (min_bigger_raise * $r.getPot()) && $r.getCurrentRaise() >= min_bigger_raise_blinds)
-    @{(positionThreshold != null && !positionThreshold.isEmpty()) ? "eval($r.getPlayerPosition() > " + positionThreshold + ")" : ""}
-    @{(handCategory != null && !handCategory.isEmpty()) ? "eval(handEvalService.isHandAtLeast($r.getHand(), \"" + handCategory + "\"))" : ""}
-    @{(requiresStrongEconomy != null && requiresStrongEconomy.equals("true")) ? "eval($r.getStrongEconomy())" : ""}
-    @{(requiresAggressiveTable != null && requiresAggressiveTable.equals("true")) ? "eval(handService.isTableAggressive())" : ""}
+    eval($r.getCurrentRaise() @{raiseThreshold} (min_bigger_raise * $r.getPot()) && $r.getCurrentRaise() @{stakesOperator} min_bigger_raise_blinds)
+    @{(handCategory != null && handCategory.trim() != "") ? 
+        "eval(handEvalService.isHandAtLeast($r.getHand(), \"" + handCategory + "\"))" : ""}
+    @{(positionThreshold != null && positionThreshold.trim() != "") ? 
+        "eval($r.getPlayerPosition() > " + positionThreshold + ")" : ""}
+    @{(requiresStrongEconomy != null && requiresStrongEconomy.trim() == "true") ? 
+        "eval($r.getStrongEconomy())" : ""}
+    @{(requiresAggressiveTable != null && requiresAggressiveTable.trim() == "true") ? 
+        "eval(handService.isTableAggressive())" : ""}
 then
-    System.out.println("Action: @{action}");
+    $r.setSuggestedAction("@{action}");
+    System.out.println("Action: @{log}");
 end
 
 end template

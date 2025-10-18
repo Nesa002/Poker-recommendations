@@ -1,3 +1,14 @@
+package rules.forward
+
+import com.ftn.sbnz.model.models.Round;
+import com.ftn.sbnz.service.services.HandService;
+import com.ftn.sbnz.service.services.HandEvalQueryService;
+
+global HandEvalQueryService handEvalService;
+global HandService handService;
+global Double min_bigger_raise;        
+global Integer min_bigger_raise_blinds;   
+global Integer bad_position_treshold;
 
 rule "HighStakesPremiumHand"
 activation-group "high_stakes"
@@ -5,11 +16,12 @@ salience 10
 when
     $r: Round()
     eval($r.getCurrentRaise() > (min_bigger_raise * $r.getPot()) && $r.getCurrentRaise() >= min_bigger_raise_blinds)
+    eval(handEvalService.isHandAtLeast($r.getHand(), "Premium"))
     
-
     
     
 then
+    $r.setSuggestedAction("RAISE");
     System.out.println("Action: RAISE (High stake");
 end
 
@@ -19,11 +31,12 @@ salience 9
 when
     $r: Round()
     eval($r.getCurrentRaise() > (min_bigger_raise * $r.getPot()) && $r.getCurrentRaise() >= min_bigger_raise_blinds)
-
-
+    eval(handEvalService.isHandAtLeast($r.getHand(), "Strong"))
+    eval($r.getPlayerPosition() > bad_position_treshold)
     
     
 then
+    $r.setSuggestedAction("RAISE");
     System.out.println("Action: RAISE (High stake");
 end
 
@@ -33,11 +46,12 @@ salience 8
 when
     $r: Round()
     eval($r.getCurrentRaise() > (min_bigger_raise * $r.getPot()) && $r.getCurrentRaise() >= min_bigger_raise_blinds)
-
-
-
+    eval(handEvalService.isHandAtLeast($r.getHand(), "Medium"))
+    eval($r.getPlayerPosition() > bad_position_treshold)
+    eval($r.getStrongEconomy())
     
 then
+    $r.setSuggestedAction("RAISE");
     System.out.println("Action: RAISE (High stake");
 end
 
@@ -47,11 +61,12 @@ salience 7
 when
     $r: Round()
     eval($r.getCurrentRaise() > (min_bigger_raise * $r.getPot()) && $r.getCurrentRaise() >= min_bigger_raise_blinds)
-
-
+    eval(handEvalService.isHandAtLeast($r.getHand(), "Medium"))
+    eval($r.getPlayerPosition() > bad_position_treshold)
     
-
+    eval(handService.isTableAggressive())
 then
+    $r.setSuggestedAction("RAISE");
     System.out.println("Action: RAISE (High stake");
 end
 
@@ -61,11 +76,12 @@ salience 6
 when
     $r: Round()
     eval($r.getCurrentRaise() > (min_bigger_raise * $r.getPot()) && $r.getCurrentRaise() >= min_bigger_raise_blinds)
+    eval(handEvalService.isHandAtLeast($r.getHand(), "Strong"))
     
-
-
+    eval($r.getStrongEconomy())
     
 then
+    $r.setSuggestedAction("RAISE");
     System.out.println("Action: RAISE (High stake");
 end
 
@@ -80,6 +96,7 @@ when
     
     
 then
+    $r.setSuggestedAction("CALL");
     System.out.println("Action: CALL (High stakes fallback)");
 end
 
@@ -88,12 +105,10 @@ activation-group "normal_stakes"
 salience 10
 when
     $r: Round()
-    eval($r.getCurrentRaise() <= (min_bigger_raise * $r.getPot()) && $r.getCurrentRaise() >= min_bigger_raise_blinds)
-    
-
-    
-    
+    eval($r.getCurrentRaise() <= (min_bigger_raise * $r.getPot()) && $r.getCurrentRaise() < min_bigger_raise_blinds)
+    eval(handEvalService.isHandAtLeast($r.getHand(), "Premium"))
 then
+    $r.setSuggestedAction("RAISE");
     System.out.println("Action: RAISE (Normal stake");
 end
 
@@ -102,12 +117,13 @@ activation-group "normal_stakes"
 salience 9
 when
     $r: Round()
-    eval($r.getCurrentRaise() <= (min_bigger_raise * $r.getPot()) && $r.getCurrentRaise() >= min_bigger_raise_blinds)
-
+    eval($r.getCurrentRaise() <= (min_bigger_raise * $r.getPot()) && $r.getCurrentRaise() < min_bigger_raise_blinds)
     
-
+    eval($r.getPlayerPosition() > bad_position_treshold)
+    eval($r.getStrongEconomy())
     
 then
+    $r.setSuggestedAction("RAISE");
     System.out.println("Action: RAISE (Normal stake");
 end
 
@@ -116,12 +132,13 @@ activation-group "normal_stakes"
 salience 8
 when
     $r: Round()
-    eval($r.getCurrentRaise() <= (min_bigger_raise * $r.getPot()) && $r.getCurrentRaise() >= min_bigger_raise_blinds)
-
-
+    eval($r.getCurrentRaise() <= (min_bigger_raise * $r.getPot()) && $r.getCurrentRaise() < min_bigger_raise_blinds)
+    eval(handEvalService.isHandAtLeast($r.getHand(), "Playable"))
+    eval($r.getPlayerPosition() > bad_position_treshold)
     
-
+    eval(handService.isTableAggressive())
 then
+    $r.setSuggestedAction("RAISE");
     System.out.println("Action: RAISE (Normal stake");
 end
 
@@ -130,12 +147,13 @@ activation-group "normal_stakes"
 salience 7
 when
     $r: Round()
-    eval($r.getCurrentRaise() <= (min_bigger_raise * $r.getPot()) && $r.getCurrentRaise() >= min_bigger_raise_blinds)
-
-
+    eval($r.getCurrentRaise() <= (min_bigger_raise * $r.getPot()) && $r.getCurrentRaise() < min_bigger_raise_blinds)
+    eval(handEvalService.isHandAtLeast($r.getHand(), "Medium"))
+    eval($r.getPlayerPosition() > bad_position_treshold)
     
     
 then
+    $r.setSuggestedAction("RAISE");
     System.out.println("Action: RAISE (Normal stake");
 end
 
@@ -144,12 +162,13 @@ activation-group "normal_stakes"
 salience 6
 when
     $r: Round()
-    eval($r.getCurrentRaise() <= (min_bigger_raise * $r.getPot()) && $r.getCurrentRaise() >= min_bigger_raise_blinds)
-
-
-
+    eval($r.getCurrentRaise() <= (min_bigger_raise * $r.getPot()) && $r.getCurrentRaise() < min_bigger_raise_blinds)
+    eval(handEvalService.isHandAtLeast($r.getHand(), "Medium"))
+    eval($r.getPlayerPosition() > bad_position_treshold)
+    eval($r.getStrongEconomy())
     
 then
+    $r.setSuggestedAction("RAISE");
     System.out.println("Action: RAISE (Normal stake");
 end
 
@@ -158,12 +177,13 @@ activation-group "normal_stakes"
 salience 5
 when
     $r: Round()
-    eval($r.getCurrentRaise() <= (min_bigger_raise * $r.getPot()) && $r.getCurrentRaise() >= min_bigger_raise_blinds)
-
-
+    eval($r.getCurrentRaise() <= (min_bigger_raise * $r.getPot()) && $r.getCurrentRaise() < min_bigger_raise_blinds)
+    eval(handEvalService.isHandAtLeast($r.getHand(), "Strong"))
+    eval($r.getPlayerPosition() > bad_position_treshold)
     
     
 then
+    $r.setSuggestedAction("RAISE");
     System.out.println("Action: RAISE (Normal stake");
 end
 
@@ -172,12 +192,13 @@ activation-group "normal_stakes"
 salience -10
 when
     $r: Round()
-    eval($r.getCurrentRaise() <= (min_bigger_raise * $r.getPot()) && $r.getCurrentRaise() >= min_bigger_raise_blinds)
+    eval($r.getCurrentRaise() <= (min_bigger_raise * $r.getPot()) && $r.getCurrentRaise() < min_bigger_raise_blinds)
     
     
     
     
 then
+    $r.setSuggestedAction("CALL");
     System.out.println("Action: CALL (Normal stakes fallback)");
 end
 

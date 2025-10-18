@@ -18,6 +18,7 @@ when
     eval($r.getCurrentRaise() > (min_bigger_raise * $r.getPot()) && $r.getCurrentRaise() >= min_bigger_raise_blinds)
     eval(handEvalService.isHandAtLeast($r.getHand(), "Premium"))
 then
+    $r.setSuggestedAction("RAISE");
     System.out.println("Action: RAISE (High stake, premium hand)");
 end
 
@@ -30,6 +31,7 @@ when
     eval($r.getPlayerPosition() > bad_position_treshold)
     eval(handEvalService.isHandAtLeast($r.getHand(), "Strong"))
 then
+    $r.setSuggestedAction("RAISE");
     System.out.println("Action: RAISE (High stake, good position, strong hand)");
 end
 
@@ -43,6 +45,7 @@ when
     eval(handEvalService.isHandAtLeast($r.getHand(), "Medium"))
     eval($r.getStrongEconomy())
 then
+    $r.setSuggestedAction("RAISE");
     System.out.println("Action: RAISE (High stake, good position, medium hand with strong economy)");
 end
 
@@ -56,6 +59,7 @@ when
     eval(handEvalService.isHandAtLeast($r.getHand(), "Medium"))
     eval(handService.isTableAggressive())
 then
+    $r.setSuggestedAction("RAISE");
     System.out.println("Action: RAISE (High stake, good position, medium hand with aggressive table)");
 end
 
@@ -69,6 +73,7 @@ when
     eval($r.getPlayerPosition() <= bad_position_treshold)
     eval($r.getStrongEconomy() && handEvalService.isHandAtLeast($r.getHand(), "Strong"))
 then
+    $r.setSuggestedAction("RAISE");
     System.out.println("Action: RAISE (High stake, bad position, strong hand/economy)");
 end
 
@@ -79,6 +84,7 @@ when
     $r: Round()
     eval($r.getCurrentRaise() > (min_bigger_raise * $r.getPot()) && $r.getCurrentRaise() >= min_bigger_raise_blinds)
 then
+    $r.setSuggestedAction("CALL");
     System.out.println("Action: CALL (High stakes fallback)");
 end
 
@@ -92,6 +98,7 @@ when
     eval($r.getCurrentRaise() <= (min_bigger_raise * $r.getPot()) && $r.getCurrentRaise() < min_bigger_raise_blinds)
     eval(handEvalService.isHandAtLeast($r.getHand(), "Premium"))
 then
+    $r.setSuggestedAction("RAISE");
     System.out.println("Action: RAISE (Normal stake, premium hand)");
 end
 
@@ -104,6 +111,7 @@ when
     eval($r.getPlayerPosition() > bad_position_treshold)
     eval($r.getStrongEconomy())
 then
+    $r.setSuggestedAction("RAISE");
     System.out.println("Action: RAISE (Normal stake, good position, strong economy)");
 end
 
@@ -116,6 +124,7 @@ when
     eval($r.getPlayerPosition() > bad_position_treshold)
     eval(handService.isTableAggressive() && handEvalService.isHandAtLeast($r.getHand(), "Playable"))
 then
+    $r.setSuggestedAction("RAISE");
     System.out.println("Action: RAISE (Normal stake, good position, aggressive table with playable hand)");
 end
 
@@ -128,6 +137,7 @@ when
     eval($r.getPlayerPosition() > bad_position_treshold)
     eval(handEvalService.isHandAtLeast($r.getHand(), "Medium"))
 then
+    $r.setSuggestedAction("RAISE");
     System.out.println("Action: RAISE (Normal stake, good position, medium hand)");
 end
 
@@ -140,6 +150,7 @@ when
     eval($r.getPlayerPosition() <= bad_position_treshold)
     eval($r.getStrongEconomy() && handEvalService.isHandAtLeast($r.getHand(), "Medium"))
 then
+    $r.setSuggestedAction("RAISE");
     System.out.println("Action: RAISE (Normal stake, bad position, strong economy with medium hand)");
 end
 
@@ -152,6 +163,7 @@ when
     eval($r.getPlayerPosition() <= bad_position_treshold)
     eval(handEvalService.isHandAtLeast($r.getHand(), "Strong"))
 then
+    $r.setSuggestedAction("RAISE");
     System.out.println("Action: RAISE (Normal stake, bad position, strong hand)");
 end
 
@@ -162,5 +174,6 @@ when
     $r: Round()
     eval($r.getCurrentRaise() <= (min_bigger_raise * $r.getPot()) && $r.getCurrentRaise() < min_bigger_raise_blinds)
 then
+    $r.setSuggestedAction("CALL");
     System.out.println("Action: CALL (Normal stakes fallback)");
 end
