@@ -65,6 +65,7 @@ public class HandService {
                     category = "Weak";
                 }
                 this.handCategories.add(new HandCategory(hand, category));
+                System.out.println(hand +" "+ category+ " "+ percentage);
             }
         } catch (Exception e) {
             throw new RuntimeException("Failed to load poker hands from " + fileName, e);
@@ -76,7 +77,7 @@ public class HandService {
         return handWinPct.getOrDefault(hand.toUpperCase(), 0.0);
     }
 
-    public boolean getTableAggressiveness() {
+    public boolean isTableAggressive() {
         long now = System.currentTimeMillis();
         long activeCount = cepRulesSession
             .getObjects(o -> o instanceof TableAggressivenessEvent)
@@ -99,10 +100,6 @@ public class HandService {
         hierarchy.add(new CategoryStrongerThan("Medium", "Playable"));
         hierarchy.add(new CategoryStrongerThan("Playable", "Weak"));
         return hierarchy;
-    }
-
-    public Double getTableAggressiveness(int hand) {
-        return 1.0;
     }
 
     public Map<String, Double> getAllHands() {

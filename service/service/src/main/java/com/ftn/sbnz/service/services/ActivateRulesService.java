@@ -1,8 +1,8 @@
 package com.ftn.sbnz.service.services;
 
-
 import com.ftn.sbnz.kjar.rules.RulesGenerator;
 import com.ftn.sbnz.model.models.Round;
+// import com.ftn.sbnz.model.models.Round.GameFaza; // Uklonjeno
 
 import java.util.List;
 
@@ -12,156 +12,151 @@ import org.kie.api.runtime.rule.QueryResults;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-
 @Service
 public class ActivateRulesService {
-  private final KieContainer kieContainer;
-  private final HandService handService;
+    private final KieContainer kieContainer;
+    private final HandService handService;
+    private final HandEvalQueryService handEvalQueryService;
 
-  @Autowired
-  public ActivateRulesService(KieContainer kieContainer, HandService handService) {
-    this.kieContainer = kieContainer;
-    this.handService = handService;
-  }
-
-  public void fireRules() {
-    KieSession kSession = kieContainer.newKieSession("forwardRulesSession");
-    try {
-        // Inject your HandService into the DRL as global
-        kSession.setGlobal("handService", handService);
-
-        // Set the global parameters for your rules
-        kSession.setGlobal("min_bigger_raise", 0.2);         // 20% of pot
-        kSession.setGlobal("min_bigger_raise_blinds", 5);    // 5 blinds
-        kSession.setGlobal("risk_margin", 0.15);             // 15% margin
-        kSession.setGlobal("bad_position_treshold", 2);      // positions <= 3 considered bad
-        kSession.setGlobal("min_strong_hand", 60.0);         // 60% hand strength
-        kSession.setGlobal("min_medium_hand", 40.0);         // 40% hand strength
-        kSession.setGlobal("tableAggressiveness", 2.0);      // total aggressiveness
-
-        List<Round> rounds = List.of(
-                new Round("AA", 1, 3,
-                        new String[]{"Alice", "Bob", "Charlie", "David"},
-                        new Integer[]{100, 100, 100, 100},
-                        25, 100, 5),
-                new Round("66", 2, 3,
-                        new String[]{"Alice", "Bob", "Charlie", "David"},
-                        new Integer[]{150, 100, 250, 80},
-                        30, 100, 5),
-                new Round("AKo", 3, 1,
-                        new String[]{"Alice", "Bob", "Charlie", "David"},
-                        new Integer[]{200, 350, 50, 50},
-                        30, 100, 5),
-                new Round("K5o", 4, 2,
-                        new String[]{"Alice", "Bob", "Charlie", "David"},
-                        new Integer[]{50, 50, 50, 50},
-                        25, 100, 5)
-            );
-
-
-        // Optionally add player actions
-        rounds.get(0).addPlayerActions("Alice", 1);
-        rounds.get(0).addPlayerActions("Bob", 0);
-
-        // Insert and fire rules **one Round at a time**
-        for (Round round : rounds) {
-            kSession.insert(round);
-            kSession.fireAllRules(); // only evaluates rules for this Round
-        }
-
-    } finally {
-        kSession.dispose();
+    @Autowired
+    public ActivateRulesService(KieContainer kieContainer, HandService handService,
+                                HandEvalQueryService handEvalQueryService) {
+        this.kieContainer = kieContainer;
+        this.handService = handService;
+        this.handEvalQueryService = handEvalQueryService;
     }
-  }
 
-  public void fireRulesBackwards() {
+    public void fireRules() {
+
+        // Define players and chip stacks for testing
+        // Hero is at index 2 (position 2) -> Bad Position (<= threshold 2)
+        String[] playersBadPos = {"Alice", "Bob", "Hero", "David"};
+        Integer[] chipsStrongEcon = {100, 100, 500, 100}; // Hero has strong economy
+        Integer[] chipsWeakEcon = {500, 500, 100, 500};   // Hero has weak economy
+
+        // Define players for "good position" testing
+        // Hero is at index 3 (position 3) -> Good Position (> threshold 2)
+        String[] playersGoodPos = {"Alice", "Bob", "David", "Hero"};
+        Integer[] chipsGoodPosStrongEcon = {100, 100, 100, 500};
+        Integer[] chipsGoodPosWeakEcon = {500, 500, 500, 100};
+
+        // Define High Stakes and Normal Stakes values
+        int hsRaise = 25; // High Stakes Raise (25 > 100*0.2 AND 25 >= 5*5)
+        int nsRaise = 4;  // Normal Stakes Raise (4 <= 100*0.2 AND 4 < 5*5)
+        int pot = 100;
+        int bb = 5;
+
         List<Round> rounds = List.of(
-            /**
-             * SCENARIO 1: DON'T FOLD
-             * Razlog: Imamo "KK" (82.0%), što je jaka ruka (preko 60%). Nijedno pravilo za fold se ne aktivira.
-             */
-            new Round("KK", 1, 3, // ruka, br. runde, pozicija
-                new String[]{"Alice", "Bob", "Charlie", "David"},
-                new Integer[]{100, 200, 150, 180}, // čipovi
-                10, 50, 5), // raise, pot, big blind
+            // ===================================
+            // === SCENARIOS FOR "HIGH_STAKES" ===
+            // ===================================
 
-            /**
-             * SCENARIO 2: FOLD ZBOG VELIKOG RAISE-A (Salience 100)
-             * Razlog: Raise (30) je veći od 5 velikih blindova (5 * 5 = 25). Naša ruka "KTo" (53.0%) nije jaka (< 60%).
-             */
-            new Round("KTo", 2, 2,
-                new String[]{"Alice", "Bob", "Charlie", "David"},
-                new Integer[]{150, 100, 250, 80},
-                30, 100, 5),
+            // R1: HS Premium Hand (RAISE)
+            // Rule: "High Stakes Strong Hand" -> isHandAtLeast("Premium")
+            new Round("AA", 1, 2, playersBadPos, chipsWeakEcon, hsRaise, pot, bb),
 
-            /**
-             * SCENARIO 3: FOLD ZBOG LOŠE POZICIJE (Salience 90)
-             * Razlog: Pozicija je 2 (<= 2). Ruka "A2o" (48.0%) nije jaka (< 60%).
-             * NAPOMENA: Za ovaj slučaj, tableAggressiveness mora biti negativan!
-             */
-            new Round("A2o", 3, 1,
-                new String[]{"Alice", "Bob", "Charlie", "David"},
-                new Integer[]{200, 350, 50, 50},
-                10, 80, 5),
+            // R2: HS Good Pos, Strong Hand (RAISE)
+            // Rule: "High Stakes Good Position Economy" -> OR isHandAtLeast("Strong")
+            new Round("AKo", 2, 3, playersGoodPos, chipsWeakEcon, hsRaise, pot, bb),
 
-            /**
-             * SCENARIO 4: FOLD ZBOG SLABE EKONOMIJE (Salience 80)
-             * Razlog: Ruka "72o" (35.0%) je slaba (< 40%). Raise i pozicija su OK.
-             * Naš igrač (Charlie) ima 50 čipova, a Bob ima 200, tako da nema jaku ekonomiju.
-             */
-            new Round("72o", 4, 1, // Igrac je "Charlie"
-                new String[]{"Alice", "Bob", "Charlie", "David"},
-                new Integer[]{100, 200, 50, 80},
-                10, 60, 5),
+            // R3: HS Good Pos, Medium Hand + Strong Econ (RAISE)
+            // Rule: "High Stakes Good Position Economy" -> ($r.getStrongEconomy()... && isHandAtLeast("Medium"))
+            new Round("QJs", 3, 3, playersGoodPos, chipsGoodPosStrongEcon, hsRaise, pot, bb),
 
-            /**
-             * SCENARIO 5: FOLD ZBOG SLABE RUKE (Salience 70 - Opšti slučaj)
-             * Razlog: Ruka "32o" (31.0%) je slaba (< 40%). Svi ostali uslovi (raise, pozicija, ekonomija) su dobri,
-             * tako da se aktivira ovo poslednje pravilo za fold kao "catch-all".
-             */
-            new Round("32o", 5, 3, // Igrac je "David"
-                new String[]{"Alice", "Bob", "Charlie", "David"},
-                new Integer[]{100, 80, 120, 250},
-                10, 40, 5)
+            // R4: HS Good Pos, Medium Hand + Aggressive Table (RAISE)
+            // Rule: "High Stakes Good Position Economy" -> (handService.isTableAggressive() && isHandAtLeast("Medium"))
+            // ASSUMPTION: HandService.isTableAggressive() will return TRUE for this test
+            new Round("QJs", 4, 3, playersGoodPos, chipsGoodPosWeakEcon, hsRaise, pot, bb),
+
+            // R5: HS Bad Pos, Strong Hand + Strong Econ (RAISE)
+            // Rule: "High Stakes Bad Position" -> isHandAtLeast("Strong")
+            new Round("AQo", 5, 2, playersBadPos, chipsStrongEcon, hsRaise, pot, bb),
+
+            // R6: HS Fallback - Bad Pos, Weak Econ, Medium Hand (CALL)
+            // Rule: "High Stakes Call Fallback" -> None of the above RAISE rules match
+            new Round("99", 6, 2, playersBadPos, chipsWeakEcon, hsRaise, pot, bb),
+
+            // R7: HS Fallback - Good Pos, Weak Econ, Playable Hand, Passive Table (CALL)
+            // Rule: "High Stakes Call Fallback" -> "HS Good Pos Econ" fails because hand < Medium and table passive
+            // ASSUMPTION: HandService.isTableAggressive() will return FALSE for this test
+            new Round("K5o", 7, 3, playersGoodPos, chipsGoodPosWeakEcon, hsRaise, pot, bb),
+
+
+            // =====================================
+            // === SCENARIOS FOR "NORMAL_STAKES" ===
+            // =====================================
+
+            // R8: NS Premium Hand (RAISE)
+            // Rule: "Normal Stakes Strong Hand" -> isHandAtLeast("Premium")
+            new Round("KK", 8, 2, playersBadPos, chipsWeakEcon, nsRaise, pot, bb),
+
+            // R9: NS Good Pos, Medium Hand (RAISE)
+            // Rule: "Normal Stakes Good Position Economy" -> OR isHandAtLeast("Medium")
+            new Round("QJs", 9, 3, playersGoodPos, chipsGoodPosWeakEcon, nsRaise, pot, bb),
+
+            // R10: NS Good Pos, Playable Hand + Strong Econ (RAISE)
+            // Rule: "Normal Stakes Good Position Economy" -> ($r.getStrongEconomy()... && isHandAtLeast("Playable"))
+            new Round("K9o", 10, 3, playersGoodPos, chipsGoodPosStrongEcon, nsRaise, pot, bb),
+
+            // R11: NS Good Pos, Playable Hand + Aggressive Table (RAISE)
+            // Rule: "Normal Stakes Good Position Economy" -> (handService.isTableAggressive() && isHandAtLeast("Playable"))
+            // ASSUMPTION: HandService.isTableAggressive() will return TRUE for this test
+            new Round("K9o", 11, 3, playersGoodPos, chipsGoodPosWeakEcon, nsRaise, pot, bb),
+
+            // R12: NS Bad Pos, Strong Hand (RAISE)
+            // Rule: "Normal Stakes Bad Position" -> OR isHandAtLeast("Strong")
+            new Round("AKo", 12, 2, playersBadPos, chipsWeakEcon, nsRaise, pot, bb),
+
+            // R13: NS Bad Pos, Medium Hand + Strong Econ (RAISE)
+            // Rule: "Normal Stakes Bad Position" -> ($r.getStrongEconomy() && isHandAtLeast("Medium"))
+            new Round("QJs", 13, 2, playersBadPos, chipsStrongEcon, nsRaise, pot, bb),
+
+            // R14: NS Fallback - Bad Pos, Weak Econ, Weak Hand (CALL)
+            // Rule: "Normal Stakes Call Fallback" -> None of the above RAISE rules match
+            new Round("72o", 14, 2, playersBadPos, chipsWeakEcon, nsRaise, pot, bb),
+
+            // R15: NS Fallback - Good Pos, Weak Econ, Weak Hand, Passive Table (CALL)
+            // Rule: "Normal Stakes Call Fallback" -> "NS Good Pos Econ" fails because hand < Playable and table passive
+            // ASSUMPTION: HandService.isTableAggressive() will return FALSE for this test
+            new Round("72o", 15, 3, playersGoodPos, chipsGoodPosWeakEcon, nsRaise, pot, bb)
         );
 
+        // Koristimo "session-per-round" pristup
         for (Round round : rounds) {
-            KieSession kSession = kieContainer.newKieSession("foldRulesSession");
+            KieSession kSession = kieContainer.newKieSession("forwardRulesSession");
             try {
-                // Set globals
-                kSession.setGlobal("handService", handService);
+                // Štampamo ulazne parametre radi lakšeg debagovanja
+                System.out.println("\n--- Evaluating FORWARD for hand: " + round.getHand() +
+                                   ", Pos: " + round.getPlayerPosition() +
+                                   ", Raise: " + round.getCurrentRaise() +
+                                   ", Pot: " + round.getPot() +
+                                   ", Econ: " + (round.getStrongEconomy() ? "Strong" : "Weak") +
+                                   ", TableAgg: " + (handService.isTableAggressive() ? "Aggressive" : "Passive") + " ---");
+
+                // 1. Postavi Globale koje DRL ZAHTEVA
+                kSession.setGlobal("handEvalService", handEvalQueryService);
+                kSession.setGlobal("handService", handService); // (Za isTableAggressive)
                 kSession.setGlobal("min_bigger_raise", 0.2);
                 kSession.setGlobal("min_bigger_raise_blinds", 5);
                 kSession.setGlobal("bad_position_treshold", 2);
-                kSession.setGlobal("min_strong_hand", 60.0);
-                kSession.setGlobal("min_medium_hand", 40.0);
-                kSession.setGlobal("tableAggressiveness", 2.0);
 
-                System.out.println("--- Evaluating round with hand: " + round.getHand() + " ---");
-
-                // Insert the round object
+                // 2. Ubaci činjenicu
                 kSession.insert(round);
 
-                // STEP 1: Fire rules. This will ONLY run the "Derive..." rules
-                // to create all the necessary helper facts.
+                // 3. Postavi fokus na activation-group
+                kSession.getAgenda().getAgendaGroup("high_stakes").setFocus();
+                kSession.getAgenda().getAgendaGroup("normal_stakes").setFocus();
+
                 kSession.fireAllRules();
 
-                // STEP 2: Now that facts exist, explicitly call the query from Java.
-                QueryResults results = kSession.getQueryResults("shouldFold", round);
-
-                // STEP 3: Check the results and print the decision.
-                if (results.size() > 0) {
-                    System.out.println("Fold (via backward chaining) for hand: " + round.getHand());
-                } else {
-                    System.out.println("Don't fold (via backward chaining) for hand: " + round.getHand());
-                }
-
             } finally {
-                // Dispose of the session to clean up everything for the next round.
                 kSession.dispose();
             }
         }
     }
+
+    // Metoda fireRulesBackwards() je obrisana.
+    
     public void generateRules() {
         try {
             RulesGenerator.generateDRL();

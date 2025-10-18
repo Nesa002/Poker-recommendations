@@ -7,7 +7,7 @@ import com.ftn.sbnz.model.models.Round;
 
 // --- REKURZIVNI QUERY ZA HIJERARHIJU KATEGORIJA ---
 query isCategoryStrongerOrEqual( String $catA, String $catB )
-    // Osnovni slučaj 1: Iste su (MORA BITI U EVAL BLOKU)
+    // Osnovni slučaj 1: Iste su
     eval( $catA.equals($catB) )
     or
     // Osnovni slučaj 2: $catA je direktno jača od $catB

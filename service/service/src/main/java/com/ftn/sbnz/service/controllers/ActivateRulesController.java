@@ -31,14 +31,9 @@ public class ActivateRulesController {
         this.handEvalTestService = handEvalTestService;
     }
 
-    @GetMapping("/forward")
+    @GetMapping("/forward/test")
     public void fireAllRules() {
         service.fireRules();
-    }
-
-    @GetMapping("/backwards")
-    public void fireAllRulesBackwards() {
-        service.fireRulesBackwards();
     }
 
     @GetMapping("/generate-rules")
@@ -64,7 +59,7 @@ public class ActivateRulesController {
     public String getAggressiveness() {
         handService.getCepRulesSession().fireAllRules();
 
-        boolean isAggressive = handService.getTableAggressiveness();
+        boolean isAggressive = handService.isTableAggressive();
 
         return isAggressive
                 ? "Table is aggressive! (CEP detected)"
