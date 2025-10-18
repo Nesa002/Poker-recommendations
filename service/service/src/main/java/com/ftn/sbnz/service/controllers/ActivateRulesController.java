@@ -2,8 +2,10 @@ package com.ftn.sbnz.service.controllers;
 
 import java.util.Date;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -11,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.ftn.sbnz.model.models.RaiseEvent;
 import com.ftn.sbnz.service.services.ActivateRulesService;
 import com.ftn.sbnz.service.services.HandService;
+import com.ftn.sbnz.service.services.HandEvalTestService;
 
 @RestController
 @RequestMapping("/rule-example")
@@ -18,11 +21,14 @@ public class ActivateRulesController {
   
     private ActivateRulesService service;
     private HandService handService;
+    private HandEvalTestService handEvalTestService;
+
 
     @Autowired
-    public ActivateRulesController(ActivateRulesService service, HandService handService) {
+    public ActivateRulesController(ActivateRulesService service, HandService handService, HandEvalTestService handEvalTestService) {
         this.service = service;
         this.handService = handService;
+        this.handEvalTestService = handEvalTestService;
     }
 
     @GetMapping("/forward")
@@ -64,4 +70,11 @@ public class ActivateRulesController {
                 ? "Table is aggressive! (CEP detected)"
                 : "Table is not aggressive.";
     } 
+    @GetMapping("/hand-eval")
+    public ResponseEntity<Map<String, Boolean>> testHandEvaluationQuery() {
+        
+        Map<String, Boolean> results = handEvalTestService.testQueries();
+        
+        return ResponseEntity.ok(results);
+    }
 }

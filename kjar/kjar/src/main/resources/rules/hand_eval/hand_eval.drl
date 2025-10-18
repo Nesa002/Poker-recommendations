@@ -1,0 +1,33 @@
+package rules.hand_eval;
+
+// Importuj nove klase iz 'model' modula
+import com.ftn.sbnz.model.models.HandCategory;
+import com.ftn.sbnz.model.models.CategoryStrongerThan;
+import com.ftn.sbnz.model.models.Round;
+
+// --- REKURZIVNI QUERY ZA HIJERARHIJU KATEGORIJA ---
+query isCategoryStrongerOrEqual( String $catA, String $catB )
+    // Osnovni slučaj 1: Iste su (MORA BITI U EVAL BLOKU)
+    eval( $catA.equals($catB) )
+    or
+    // Osnovni slučaj 2: $catA je direktno jača od $catB
+    CategoryStrongerThan( $catA, $catB; )
+    or
+    // Rekurzivni slučaj: $catA > $intermediate I $intermediate >= $catB
+    (
+        CategoryStrongerThan( $catA, $intermediate; ) and
+        isCategoryStrongerOrEqual( $intermediate, $catB; )
+    )
+end
+
+
+// --- GLAVNI QUERY ZA EVALUACIJU RUKE ---
+query isHandAtLeastCategory( String $hand, String $requiredCategory )
+
+    // 1. Pronađi kategoriju za datu ruku
+    HandCategory( $hand, $handCategory; )
+    
+    // 2. Pozovi rekurzivni query da proveriš hijerarhiju
+    isCategoryStrongerOrEqual( $handCategory, $requiredCategory; )
+
+end

@@ -1,5 +1,5 @@
 ruleName,stakeLevel,salience,raiseThreshold,positionThreshold,minWinPercentage,requiresStrongEconomy,action
-HighStakesStrongHand,high_stakes,10,>, ,95,,RAISE (High stake, strong hand)
-HighStakesGoodPositionEconomy,high_stakes,9,>,3,80,true,RAISE (High stake, good position, strong hand/economy)
-HighStakesBadPosition,high_stakes,8,>,3,90,true,RAISE (High stake, bad position, strong hand/economy)
+HighStakesStrongHand,high_stakes,10,>, ,0.95,,RAISE (High stake, strong hand)
+HighStakesGoodPositionEconomy,high_stakes,9,>,3,0.80,true,RAISE (High stake, good position, strong hand/economy)
+HighStakesBadPosition,high_stakes,8,>,3,0.90,true,RAISE (High stake, bad position, strong hand/economy)
 HighStakesCallFallback,high_stakes,-10,>, , ,,CALL (High stakes fallback)
