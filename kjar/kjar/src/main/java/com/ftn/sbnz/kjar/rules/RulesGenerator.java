@@ -22,6 +22,12 @@ public class RulesGenerator {
     public static void generateDRL() throws Exception {
         ClassLoader classLoader = RulesGenerator.class.getClassLoader();
 
+        InputStream globalsStream = classLoader.getResourceAsStream("rules/template/globals.drl");
+        if (globalsStream == null) {
+            throw new RuntimeException("Globals file not found!");
+        }
+        String globals = new String(globalsStream.readAllBytes(), StandardCharsets.UTF_8);
+
         // Učitavanje template fajla
         InputStream templateStream = classLoader.getResourceAsStream("rules/template/poker_rules_template.drl");
         if (templateStream == null) {
@@ -53,15 +59,15 @@ public class RulesGenerator {
         }
 
         ObjectDataCompiler compiler = new ObjectDataCompiler();
-        String drl = compiler.compile(rulesData, templateStream);
+        String rulesDrl = compiler.compile(rulesData, templateStream);
+        
+        String drl = globals + "\n" + rulesDrl;
 
         Path projectRoot = Paths.get("").toAbsolutePath();
 
         Path outputDir = projectRoot.resolve("kjar/kjar/src/main/resources/rules/forward");
 
         Files.createDirectories(outputDir);
-
-        System.out.println(drl);
 
         Path outputFile = outputDir.resolve("generated_rules.drl");
         Files.writeString(outputFile, drl, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);

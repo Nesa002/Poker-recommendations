@@ -5,6 +5,7 @@ salience
 raiseThreshold
 stakesOperator
 positionThreshold
+positionOperator
 handCategory
 requiresStrongEconomy
 requiresAggressiveTable
@@ -22,7 +23,7 @@ when
     @{(handCategory != null && handCategory.trim() != "") ? 
         "eval(handEvalService.isHandAtLeast($r.getHand(), \"" + handCategory + "\"))" : ""}
     @{(positionThreshold != null && positionThreshold.trim() != "") ? 
-        "eval($r.getPlayerPosition() > " + positionThreshold + ")" : ""}
+        "eval($r.getPlayerPosition() " + positionOperator + " " + positionThreshold + ")" : ""}
     @{(requiresStrongEconomy != null && requiresStrongEconomy.trim() == "true") ? 
         "eval($r.getStrongEconomy())" : ""}
     @{(requiresAggressiveTable != null && requiresAggressiveTable.trim() == "true") ? 

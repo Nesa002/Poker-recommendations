@@ -1,0 +1,11 @@
+package rules.forward
+
+import com.ftn.sbnz.model.models.Round;
+import com.ftn.sbnz.service.services.HandService;
+import com.ftn.sbnz.service.services.HandEvalQueryService;
+
+global HandEvalQueryService handEvalService;
+global HandService handService;
+global Double min_bigger_raise;
+global Integer min_bigger_raise_blinds;
+global Integer bad_position_treshold;
