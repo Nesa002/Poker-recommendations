@@ -10,7 +10,7 @@ global Double min_bigger_raise;
 global Integer min_bigger_raise_blinds;   
 global Integer bad_position_treshold;
 
-rule "High Stakes Strong Hand"
+rule "High Stakes Preminum Hand"
 activation-group "high_stakes"
 salience 10
 when
@@ -21,22 +21,47 @@ then
     System.out.println("Action: RAISE (High stake, premium hand)");
 end
 
-rule "High Stakes Good Position Economy"
+rule "High Stakes Good Position - Strong Hand"
 activation-group "high_stakes"
 salience 9
 when
     $r: Round()
-
     eval($r.getCurrentRaise() > (min_bigger_raise * $r.getPot()) && $r.getCurrentRaise() >= min_bigger_raise_blinds)
     eval($r.getPlayerPosition() > bad_position_treshold)
-    eval(($r.getStrongEconomy() || handService.isTableAggressive() && handEvalService.isHandAtLeast($r.getHand(), "Medium")) || handEvalService.isHandAtLeast($r.getHand(), "Strong"))
+    eval(handEvalService.isHandAtLeast($r.getHand(), "Strong"))
 then
-    System.out.println("Action: RAISE (High stake, good position, strong hand/economy)");
+    System.out.println("Action: RAISE (High stake, good position, strong hand)");
+end
+
+rule "High Stakes Good Position - Medium Hand with Strong Economy"
+activation-group "high_stakes"
+salience 8
+when
+    $r: Round()
+    eval($r.getCurrentRaise() > (min_bigger_raise * $r.getPot()) && $r.getCurrentRaise() >= min_bigger_raise_blinds)
+    eval($r.getPlayerPosition() > bad_position_treshold)
+    eval(handEvalService.isHandAtLeast($r.getHand(), "Medium"))
+    eval($r.getStrongEconomy())
+then
+    System.out.println("Action: RAISE (High stake, good position, medium hand with strong economy)");
+end
+
+rule "High Stakes Good Position - Medium Hand with Aggressive Table"
+activation-group "high_stakes"
+salience 7
+when
+    $r: Round()
+    eval($r.getCurrentRaise() > (min_bigger_raise * $r.getPot()) && $r.getCurrentRaise() >= min_bigger_raise_blinds)
+    eval($r.getPlayerPosition() > bad_position_treshold)
+    eval(handEvalService.isHandAtLeast($r.getHand(), "Medium"))
+    eval(handService.isTableAggressive())
+then
+    System.out.println("Action: RAISE (High stake, good position, medium hand with aggressive table)");
 end
 
 rule "High Stakes Bad Position"
 activation-group "high_stakes"
-salience 8
+salience 6
 when
     $r: Round()
     
@@ -70,30 +95,64 @@ then
     System.out.println("Action: RAISE (Normal stake, premium hand)");
 end
 
-rule "Normal Stakes Good Position Economy"
+rule "Normal Stakes Good Position - Strong Economy"
 activation-group "normal_stakes"
 salience 9
 when
     $r: Round()
-
     eval($r.getCurrentRaise() <= (min_bigger_raise * $r.getPot()) && $r.getCurrentRaise() < min_bigger_raise_blinds)
     eval($r.getPlayerPosition() > bad_position_treshold)
-    eval(($r.getStrongEconomy() || handService.isTableAggressive() && handEvalService.isHandAtLeast($r.getHand(), "Playable")) || handEvalService.isHandAtLeast($r.getHand(), "Medium"))
+    eval($r.getStrongEconomy())
 then
-    System.out.println("Action: RAISE (Normal stake, good position, medium hand/economy or strong hand)");
+    System.out.println("Action: RAISE (Normal stake, good position, strong economy)");
 end
 
-rule "Normal Stakes Bad Position"
+rule "Normal Stakes Good Position - Aggressive Table with Playable Hand"
 activation-group "normal_stakes"
 salience 8
 when
     $r: Round()
-    
+    eval($r.getCurrentRaise() <= (min_bigger_raise * $r.getPot()) && $r.getCurrentRaise() < min_bigger_raise_blinds)
+    eval($r.getPlayerPosition() > bad_position_treshold)
+    eval(handService.isTableAggressive() && handEvalService.isHandAtLeast($r.getHand(), "Playable"))
+then
+    System.out.println("Action: RAISE (Normal stake, good position, aggressive table with playable hand)");
+end
+
+rule "Normal Stakes Good Position - Medium Hand"
+activation-group "normal_stakes"
+salience 7
+when
+    $r: Round()
+    eval($r.getCurrentRaise() <= (min_bigger_raise * $r.getPot()) && $r.getCurrentRaise() < min_bigger_raise_blinds)
+    eval($r.getPlayerPosition() > bad_position_treshold)
+    eval(handEvalService.isHandAtLeast($r.getHand(), "Medium"))
+then
+    System.out.println("Action: RAISE (Normal stake, good position, medium hand)");
+end
+
+rule "Normal Stakes Bad Position - Strong Economy with Medium Hand"
+activation-group "normal_stakes"
+salience 6
+when
+    $r: Round()
     eval($r.getCurrentRaise() <= (min_bigger_raise * $r.getPot()) && $r.getCurrentRaise() < min_bigger_raise_blinds)
     eval($r.getPlayerPosition() <= bad_position_treshold)
-    eval(($r.getStrongEconomy() && handEvalService.isHandAtLeast($r.getHand(), "Medium")) || handEvalService.isHandAtLeast($r.getHand(), "Strong"))
+    eval($r.getStrongEconomy() && handEvalService.isHandAtLeast($r.getHand(), "Medium"))
 then
-    System.out.println("Action: RAISE (Normal stake, bad position, playable hand/economy or medium hand)");
+    System.out.println("Action: RAISE (Normal stake, bad position, strong economy with medium hand)");
+end
+
+rule "Normal Stakes Bad Position - Strong Hand"
+activation-group "normal_stakes"
+salience 5
+when
+    $r: Round()
+    eval($r.getCurrentRaise() <= (min_bigger_raise * $r.getPot()) && $r.getCurrentRaise() < min_bigger_raise_blinds)
+    eval($r.getPlayerPosition() <= bad_position_treshold)
+    eval(handEvalService.isHandAtLeast($r.getHand(), "Strong"))
+then
+    System.out.println("Action: RAISE (Normal stake, bad position, strong hand)");
 end
 
 rule "Normal Stakes Call Fallback"
