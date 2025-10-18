@@ -1,0 +1,38 @@
+template header
+ruleName
+stakeLevel
+salience
+requiresPlayableHand
+requiresMediumHand
+requiresBadPosition
+requiresBigRaise
+requiresWeakEconomy
+requiresPassiveTable
+action
+log
+
+template "fold-rules"
+
+rule "@{ruleName}"
+activation-group "@{stakeLevel}"
+salience @{salience}
+when
+    $r: Round()
+    @{(requiresPlayableHand != null && requiresPlayableHand.trim() == "false") ?
+        "eval(!handEvalService.isHandAtLeast($r.getHand(), \"Playable\"))" : ""}
+    @{(requiresMediumHand != null && requiresMediumHand.trim() == "false") ?
+        "eval(!handEvalService.isHandAtLeast($r.getHand(), \"Medium\"))" : ""}
+    @{(requiresBadPosition != null && requiresBadPosition.trim() == "true") ?
+        "eval($r.getPlayerPosition() <= bad_position_treshold)" : ""}
+    @{(requiresBigRaise != null && requiresBigRaise.trim() == "true") ?
+        "eval($r.getCurrentRaise() > (min_bigger_raise * $r.getPot()) && $r.getCurrentRaise() >= min_bigger_raise_blinds)" : ""}
+    @{(requiresWeakEconomy != null && requiresWeakEconomy.trim() == "true") ?
+        "eval($r.getStrongEconomy() == false)" : ""}
+    @{(requiresPassiveTable != null && requiresPassiveTable.trim() == "true") ?
+        "eval(!handService.isTableAggressive())" : ""}
+then
+    $r.setSuggestedAction("@{action}");
+    System.out.println("Backward: @{log}");
+end
+
+end template

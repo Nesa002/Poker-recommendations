@@ -18,6 +18,10 @@ public class ActivateRulesService {
     private final HandService handService;
     private final HandEvalQueryService handEvalQueryService;
 
+    private final Double MIN_BIGGER_RAISE = 0.2;
+    private final Integer MIN_BIGGER_RAISE_BLINDS = 5;
+    private final Integer BAD_POSITION_TRESHOLD = 2;
+
     @Autowired
     public ActivateRulesService(KieContainer kieContainer, HandService handService,
                                 HandEvalQueryService handEvalQueryService) {
@@ -235,8 +239,67 @@ public class ActivateRulesService {
         }
     }
 
-    // Metoda fireRulesBackwards() je obrisana.
-    
+    public Round evaluateFoldRules(Round round) {
+        // Kreiramo sesiju specifično za FOLD logiku
+        KieSession kSession = kieContainer.newKieSession("foldRulesSession");
+        try {
+            // 1. Postavi sve potrebne globale
+            setGlobals(kSession);
+
+            // 2. Ubaci trenutnu rundu kao činjenicu
+            kSession.insert(round);
+
+            // 3. Fokusiraj se na 'activation-group' za odustajanje
+            kSession.getAgenda().getAgendaGroup("fold_decision").setFocus();
+
+            // 4. Pokreni pravila
+            kSession.fireAllRules();
+
+        } finally {
+            // 5. Obavezno uništi sesiju
+            kSession.dispose();
+        }
+        
+        // 6. Vrati modifikovanu rundu.
+        // Drools je modifikovao 'round' objekat koji je bio prosleđen.
+        return round;
+    }
+
+    public Round evaluateRaiseRules(Round round) {
+        // Kreiramo sesiju specifično za FORWARD logiku
+        KieSession kSession = kieContainer.newKieSession("forwardRulesSession");
+        try {
+            // 1. Postavi sve potrebne globale
+            setGlobals(kSession);
+
+            // 2. Ubaci trenutnu rundu kao činjenicu
+            kSession.insert(round);
+
+            // 3. Fokusiraj se na 'activation-groups' za Raise/Call
+            kSession.getAgenda().getAgendaGroup("high_stakes").setFocus();
+            kSession.getAgenda().getAgendaGroup("normal_stakes").setFocus();
+
+            // 4. Pokreni pravila
+            kSession.fireAllRules();
+
+        } finally {
+            // 5. Obavezno uništi sesiju
+            kSession.dispose();
+        }
+        
+        // 6. Vrati modifikovanu rundu.
+        // Drools je modifikovao 'round' objekat (npr. postavio suggestedAction na "RAISE" ili "CALL")
+        return round;
+    }
+
+    private void setGlobals(KieSession kSession) {
+        kSession.setGlobal("handEvalService", handEvalQueryService);
+        kSession.setGlobal("handService", handService);
+        kSession.setGlobal("min_bigger_raise", this.MIN_BIGGER_RAISE);
+        kSession.setGlobal("min_bigger_raise_blinds", this.MIN_BIGGER_RAISE_BLINDS);
+        kSession.setGlobal("bad_position_treshold", this.BAD_POSITION_TRESHOLD);
+    }
+
     public void generateRules() {
         try {
             RulesGenerator.generateDRL();

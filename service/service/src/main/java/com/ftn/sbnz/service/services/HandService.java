@@ -25,7 +25,6 @@ public class HandService {
     private final Map<String, Double> handWinPct = new HashMap<>();
     private List<HandCategory> handCategories = new ArrayList<>();
 
-    // File name relative to src/main/resources
     private final String fileName = "poker_hands.txt";
 
     private final KieSession cepRulesSession;
@@ -65,7 +64,6 @@ public class HandService {
                     category = "Weak";
                 }
                 this.handCategories.add(new HandCategory(hand, category));
-                System.out.println(hand +" "+ category+ " "+ percentage);
             }
         } catch (Exception e) {
             throw new RuntimeException("Failed to load poker hands from " + fileName, e);

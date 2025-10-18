@@ -1,4 +1,4 @@
-package rules.fold
+package rules.forward
 
 import com.ftn.sbnz.model.models.Round;
 import com.ftn.sbnz.service.services.HandService;
@@ -13,13 +13,18 @@ global Integer bad_position_treshold;
 
 rule "Fold - Below Medium Hand"
 activation-group "fold_decision"
-salience 10 
+salience 10
 when
     $r: Round()
     eval(!handEvalService.isHandAtLeast($r.getHand(), "Playable"))
+    
+    
+    
+    
+    
 then
     $r.setSuggestedAction("FOLD");
-    System.out.println("Action: FOLD (Hand is below playable)");
+    System.out.println("Backward: FOLD (Hand is below playable)");
 end
 
 rule "Fold - Big Raise vs Not Medium Hand"
@@ -27,11 +32,15 @@ activation-group "fold_decision"
 salience 9
 when
     $r: Round()
-    eval($r.getCurrentRaise() > (min_bigger_raise * $r.getPot()) && $r.getCurrentRaise() >= min_bigger_raise_blinds)
+    
     eval(!handEvalService.isHandAtLeast($r.getHand(), "Medium"))
+    
+    eval($r.getCurrentRaise() > (min_bigger_raise * $r.getPot()) && $r.getCurrentRaise() >= min_bigger_raise_blinds)
+    
+    
 then
     $r.setSuggestedAction("FOLD");
-    System.out.println("Action: FOLD (Big raise vs. not medium hand)");
+    System.out.println("Backward: FOLD (Big raise vs. not medium hand)");
 end
 
 rule "Fold - Bad Position vs Not Medium Hand"
@@ -39,31 +48,47 @@ activation-group "fold_decision"
 salience 8
 when
     $r: Round()
-    eval($r.getPlayerPosition() <= bad_position_treshold)
+    
     eval(!handEvalService.isHandAtLeast($r.getHand(), "Medium"))
+    eval($r.getPlayerPosition() <= bad_position_treshold)
+    
+    
+    
 then
     $r.setSuggestedAction("FOLD");
-    System.out.println("Action: FOLD (Bad position vs. not medium hand)");
+    System.out.println("Backward: FOLD (Bad position vs. not medium hand)");
 end
 
 rule "Fold - Below Medium Hand with Weakness"
 activation-group "fold_decision"
-salience 7 
+salience 7
 when
     $r: Round()
+    
     eval(!handEvalService.isHandAtLeast($r.getHand(), "Medium"))
-    eval($r.getStrongEconomy() == false && !handService.isTableAggressive())
+    
+    
+    eval($r.getStrongEconomy() == false)
+    eval(!handService.isTableAggressive())
 then
     $r.setSuggestedAction("FOLD");
-    System.out.println("Action: FOLD (Below medium hand with weak economy or low aggression)");
+    System.out.println("Backward: FOLD (Below medium hand with weak economy or low aggression)");
 end
 
 rule "Fold - Default No Fold"
 activation-group "fold_decision"
 salience -10
 when
-    $r: Round() 
+    $r: Round()
+    
+    
+    
+    
+    
+    
 then
-    $r.setSuggestedAction("NO FOLD"); 
-    System.out.println("Action: NO FOLD (No fold conditions met)");
+    $r.setSuggestedAction("NO FOLD");
+    System.out.println("Backward: NO FOLD (No fold conditions met)");
 end
+
+

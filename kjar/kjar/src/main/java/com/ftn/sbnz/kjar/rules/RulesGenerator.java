@@ -22,22 +22,50 @@ public class RulesGenerator {
     public static void generateDRL() throws Exception {
         ClassLoader classLoader = RulesGenerator.class.getClassLoader();
 
+        // Globals
         InputStream globalsStream = classLoader.getResourceAsStream("rules/template/globals.drl");
         if (globalsStream == null) {
             throw new RuntimeException("Globals file not found!");
         }
         String globals = new String(globalsStream.readAllBytes(), StandardCharsets.UTF_8);
 
+        // Forward rules
+        generateDRLForTemplate(
+                classLoader,
+                "rules/template/poker_rules_template.drl",
+                "rules/template/poker_rules.csv",
+                "forward",
+                globals
+        );
+
+        // Fold rules
+        generateDRLForTemplate(
+                classLoader,
+                "rules/template/fold_template.drl",
+                "rules/template/fold_data.csv",
+                "fold",
+                globals
+        );
+    }
+
+    private static void generateDRLForTemplate(
+            ClassLoader classLoader,
+            String templatePath,
+            String csvPath,
+            String outputFolderName,
+            String globals
+    ) throws Exception {
+
         // Učitavanje template fajla
-        InputStream templateStream = classLoader.getResourceAsStream("rules/template/poker_rules_template.drl");
+        InputStream templateStream = classLoader.getResourceAsStream(templatePath);
         if (templateStream == null) {
-            throw new RuntimeException("Template file not found!");
+            throw new RuntimeException("Template file not found: " + templatePath);
         }
 
         // Učitavanje CSV fajla
-        InputStream csvStream = classLoader.getResourceAsStream("rules/template/poker_rules.csv");
+        InputStream csvStream = classLoader.getResourceAsStream(csvPath);
         if (csvStream == null) {
-            throw new RuntimeException("CSV file not found!");
+            throw new RuntimeException("CSV file not found: " + csvPath);
         }
 
         // Parsiranje CSV-a
@@ -53,26 +81,23 @@ public class RulesGenerator {
                 for (String header : parser.getHeaderMap().keySet()) {
                     map.put(header, record.get(header));
                 }
-                System.out.println(map);
                 rulesData.add(map);
             }
         }
 
         ObjectDataCompiler compiler = new ObjectDataCompiler();
         String rulesDrl = compiler.compile(rulesData, templateStream);
-        
+
         String drl = globals + "\n" + rulesDrl;
 
+        // Zapisivanje
         Path projectRoot = Paths.get("").toAbsolutePath();
-
-        Path outputDir = projectRoot.resolve("kjar/kjar/src/main/resources/rules/forward");
-
+        Path outputDir = projectRoot.resolve("kjar/kjar/src/main/resources/rules/" + outputFolderName);
         Files.createDirectories(outputDir);
 
         Path outputFile = outputDir.resolve("generated_rules.drl");
         Files.writeString(outputFile, drl, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
 
         System.out.println("DRL saved to: " + outputFile.toAbsolutePath());
-
     }
 }

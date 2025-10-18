@@ -1,0 +1,6 @@
+ruleName,stakeLevel,salience,requiresPlayableHand,requiresMediumHand,requiresBadPosition,requiresBigRaise,requiresWeakEconomy,requiresPassiveTable,action,log
+Fold - Below Medium Hand,fold_decision,10,false,,,,,,FOLD,FOLD (Hand is below playable)
+Fold - Big Raise vs Not Medium Hand,fold_decision,9,,false,,true,,,FOLD,FOLD (Big raise vs. not medium hand)
+Fold - Bad Position vs Not Medium Hand,fold_decision,8,,false,true,,,,FOLD,FOLD (Bad position vs. not medium hand)
+Fold - Below Medium Hand with Weakness,fold_decision,7,,false,,false,true,true,FOLD,FOLD (Below medium hand with weak economy or low aggression)
+Fold - Default No Fold,fold_decision,-10,,,,,,,NO FOLD,NO FOLD (No fold conditions met)
