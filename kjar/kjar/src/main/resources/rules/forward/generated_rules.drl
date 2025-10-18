@@ -78,7 +78,7 @@ when
     $r: Round()
     eval($r.getCurrentRaise() > (min_bigger_raise * $r.getPot()) && $r.getCurrentRaise() >= min_bigger_raise_blinds)
     eval(handEvalService.isHandAtLeast($r.getHand(), "Strong"))
-    
+    eval($r.getPlayerPosition() <= bad_position_treshold)
     eval($r.getStrongEconomy())
     
 then
