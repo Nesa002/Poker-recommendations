@@ -4,8 +4,9 @@ stakeLevel
 salience
 raiseThreshold
 positionThreshold
-minWinPercentage
+handCategory
 requiresStrongEconomy
+requiresAggressiveTable
 action
 
 template "poker-rules"
@@ -15,15 +16,11 @@ activation-group "@{stakeLevel}"
 salience @{salience}
 when
     $r: Round()
-    eval($r.getCurrentRaise() @{raiseThreshold} (min_bigger_raise * $r.getPot())
-         && $r.getCurrentRaise() >= min_bigger_raise_blinds)
-    @{(positionThreshold != null && positionThreshold.trim() != "") ? 
-    "eval($r.getPlayerPosition() > " + positionThreshold + ")" : 
-    ""}
-    @{(minWinPercentage != null && minWinPercentage.trim() != "") ? 
-        "eval(" + 
-        (requiresStrongEconomy == "true" ? "($r.getStrongEconomy() || handService.getTableAggressiveness($r.getRoundNum()) > 0) && " : "") + 
-        "handService.getWinPercentage($r.getHand()) >= " + minWinPercentage + ")" : ""}
+    eval($r.getCurrentRaise() @{raiseThreshold} (min_bigger_raise * $r.getPot()) && $r.getCurrentRaise() >= min_bigger_raise_blinds)
+    @{(positionThreshold != null && !positionThreshold.isEmpty()) ? "eval($r.getPlayerPosition() > " + positionThreshold + ")" : ""}
+    @{(handCategory != null && !handCategory.isEmpty()) ? "eval(handEvalService.isHandAtLeast($r.getHand(), \"" + handCategory + "\"))" : ""}
+    @{(requiresStrongEconomy != null && requiresStrongEconomy.equals("true")) ? "eval($r.getStrongEconomy())" : ""}
+    @{(requiresAggressiveTable != null && requiresAggressiveTable.equals("true")) ? "eval(handService.isTableAggressive())" : ""}
 then
     System.out.println("Action: @{action}");
 end

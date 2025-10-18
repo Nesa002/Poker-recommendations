@@ -57,11 +57,11 @@ public class RulesGenerator {
 
         Path projectRoot = Paths.get("").toAbsolutePath();
 
-        Path rootProject = projectRoot.getParent().getParent();
-
-        Path outputDir = rootProject.resolve("kjar/kjar/src/main/resources/rules/forward");
+        Path outputDir = projectRoot.resolve("kjar/kjar/src/main/resources/rules/forward");
 
         Files.createDirectories(outputDir);
+
+        System.out.println(drl);
 
         Path outputFile = outputDir.resolve("generated_rules.drl");
         Files.writeString(outputFile, drl, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
