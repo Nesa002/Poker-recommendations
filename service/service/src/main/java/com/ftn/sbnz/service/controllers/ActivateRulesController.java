@@ -36,6 +36,11 @@ public class ActivateRulesController {
         service.fireRules();
     }
 
+    @GetMapping("/fold/test")
+    public void foldRules() {
+        service.fireRulesFold();
+    }
+
     @GetMapping("/generate-rules")
     public void generateRules() {
         service.generateRules();

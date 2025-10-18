@@ -2,51 +2,68 @@ package rules.fold
 
 import com.ftn.sbnz.model.models.Round;
 import com.ftn.sbnz.service.services.HandService;
-  // All your globals... 
+import com.ftn.sbnz.service.services.HandEvalQueryService;
+
+global HandEvalQueryService handEvalService;
 global HandService handService;
-global Double min_bigger_raise; 
-global Integer min_bigger_raise_blinds; 
-global Integer bad_position_treshold; 
-global Double min_strong_hand; 
-global Double min_medium_hand; 
-global Double tableAggressiveness; 
+global Double min_bigger_raise;
+global Integer min_bigger_raise_blinds;
+global Integer bad_position_treshold;
 
-// --- 1. HELPER FACTS (No changes) --- 
-declare IsBelowMediumHand round: Round end 
-declare IsNotStrongHand round: Round end 
-declare IsBigRaise round: Round end 
-declare IsInBadPosition round: Round end 
-declare HasWeakEconomy round: Round end 
-declare IsTableAggressionLow end 
 
-// --- 2. DERIVATION RULES (No changes) --- 
-rule "Derive Hand Strength - Below Medium _bw" when $r:
-    Round(handService.getWinPercentage(getHand()) < min_medium_hand) then insert(new IsBelowMediumHand($r));
+rule "Fold - Below Medium Hand"
+activation-group "fold_decision"
+salience 10 
+when
+    $r: Round()
+    eval(!handEvalService.isHandAtLeast($r.getHand(), "Playable"))
+then
+    $r.setSuggestedAction("FOLD");
+    System.out.println("Action: FOLD (Hand is below playable)");
 end
 
-rule "Derive Hand Strength - Not Strong _bw" when $r:
-    Round(handService.getWinPercentage(getHand()) < min_strong_hand) then insert(new IsNotStrongHand($r));
-end 
-
-rule "Derive Big Raise _bw" when $r: 
-    Round(currentRaise >= min_bigger_raise_blinds * bigBlindSize || currentRaise > min_bigger_raise * pot) then insert(new IsBigRaise($r));
-end 
-
-rule "Derive Bad Position _bw" when $r:
-    Round(playerPosition <= bad_position_treshold) then insert(new IsInBadPosition($r)); 
-end 
-
-rule "Derive Weak Economy _bw" when $r:
-    Round(strongEconomy == false) then insert(new HasWeakEconomy($r)); 
+rule "Fold - Big Raise vs Not Medium Hand"
+activation-group "fold_decision"
+salience 9
+when
+    $r: Round()
+    eval($r.getCurrentRaise() > (min_bigger_raise * $r.getPot()) && $r.getCurrentRaise() >= min_bigger_raise_blinds)
+    eval(!handEvalService.isHandAtLeast($r.getHand(), "Medium"))
+then
+    $r.setSuggestedAction("FOLD");
+    System.out.println("Action: FOLD (Big raise vs. not medium hand)");
 end
 
-rule "Derive Low Table Aggression _bw" no-loop when
-    not IsTableAggressionLow() and eval(tableAggressiveness < 0) then insert(new IsTableAggressionLow());
+rule "Fold - Bad Position vs Not Medium Hand"
+activation-group "fold_decision"
+salience 8
+when
+    $r: Round()
+    eval($r.getPlayerPosition() <= bad_position_treshold)
+    eval(!handEvalService.isHandAtLeast($r.getHand(), "Medium"))
+then
+    $r.setSuggestedAction("FOLD");
+    System.out.println("Action: FOLD (Bad position vs. not medium hand)");
 end
 
- // --- 3. BACKWARD-CHAINING QUERY --- 
- query shouldFold( Round $r )
-    IsBelowMediumHand(round == $r) or
-    ( IsBigRaise(round == $r) and IsNotStrongHand(round == $r) and ( IsTableAggressionLow() or IsBelowMediumHand(round == $r) ) ) or
-    ( IsInBadPosition(round == $r) and IsNotStrongHand(round == $r) and ( IsBelowMediumHand(round == $r) or IsTableAggressionLow() ) ) or
-    ( IsBelowMediumHand(round == $r) and ( HasWeakEconomy(round == $r) or IsTableAggressionLow() ) ) end
+rule "Fold - Below Medium Hand with Weakness"
+activation-group "fold_decision"
+salience 7 
+when
+    $r: Round()
+    eval(!handEvalService.isHandAtLeast($r.getHand(), "Medium"))
+    eval($r.getStrongEconomy() == false && !handService.isTableAggressive())
+then
+    $r.setSuggestedAction("FOLD");
+    System.out.println("Action: FOLD (Below medium hand with weak economy or low aggression)");
+end
+
+rule "Fold - Default No Fold"
+activation-group "fold_decision"
+salience -10
+when
+    $r: Round() 
+then
+    $r.setSuggestedAction("NO FOLD"); 
+    System.out.println("Action: NO FOLD (No fold conditions met)");
+end

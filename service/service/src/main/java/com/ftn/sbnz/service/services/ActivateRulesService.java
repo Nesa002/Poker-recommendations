@@ -155,6 +155,86 @@ public class ActivateRulesService {
         }
     }
 
+    public void fireRulesFold() {
+        
+        // Definišemo iste testne parametre kao u fireRules() za konzistentnost
+        
+        // Hero je na indexu 2 (pozicija 2) -> Loša Pozicija (<= threshold 2)
+        String[] playersBadPos = {"Alice", "Bob", "Hero", "David"};
+        Integer[] chipsStrongEcon = {100, 100, 500, 100}; // Hero ima jaku ekonomiju
+        Integer[] chipsWeakEcon = {500, 500, 100, 500};   // Hero ima slabu ekonomiju
+
+        // Hero je na indexu 3 (pozicija 3) -> Dobra Pozicija (> threshold 2)
+        String[] playersGoodPos = {"Alice", "Bob", "David", "Hero"};
+        Integer[] chipsGoodPosStrongEcon = {100, 100, 100, 500};
+        Integer[] chipsGoodPosWeakEcon = {500, 500, 500, 100};
+
+        // Definišemo High Stakes i Normal Stakes vrednosti
+        int hsRaise = 25; // High Stakes Raise (25 > 100*0.2 AND 25 >= 5*5)
+        int nsRaise = 4;  // Normal Stakes Raise (4 <= 100*0.2 AND 4 < 5*5)
+        int pot = 100;
+        int bb = 5;
+
+        List<Round> rounds = List.of(
+            // F1: FOLD - Salience 10 (Below Playable) - TAČNO
+            new Round("72o", 1, 3, playersGoodPos, chipsGoodPosStrongEcon, nsRaise, pot, bb),
+
+            // F2: FOLD - Salience 9 (Big Raise vs Not Medium)
+            // Korišćenjem K7o (0.49) koji je "Playable", ali NIJE "Medium".
+            new Round("K7o", 2, 2, playersBadPos, chipsStrongEcon, hsRaise, pot, bb), // ISPRAVLJENO
+
+            // F3: FOLD - Salience 8 (Bad Position vs Not Medium)
+            // Korišćenjem K7o (0.49). Raise NIJE veliki. Pozicija LOŠA.
+            new Round("K7o", 3, 2, playersBadPos, chipsWeakEcon, nsRaise, pot, bb), // ISPRAVLJENO
+
+            // F4: FOLD - Salience 7 (Not Medium + Weakness)
+            // Korišćenjem K7o (0.49). Raise NIJE veliki. Pozicija DOBRA. Ekonomija SLABA.
+            new Round("K7o", 4, 3, playersGoodPos, chipsGoodPosWeakEcon, nsRaise, pot, bb), // ISPRAVLJENO
+
+            // F5: KONTROLNI SLUČAJ - NO FOLD - TAČNO
+            // QJs (0.54) je "Medium" i ne treba da aktivira nijedno pravilo.
+            new Round("QJs", 5, 3, playersGoodPos, chipsGoodPosWeakEcon, nsRaise, pot, bb)
+        );
+
+        // Koristimo "session-per-round" pristup
+        for (Round round : rounds) {
+            // KREIRAMO SESIJU IZ "foldRulesSession"
+            KieSession kSession = kieContainer.newKieSession("foldRulesSession");
+            try {
+                // Štampamo ulazne parametre radi lakšeg debagovanja
+                System.out.println("\n--- Evaluating FOLD for hand: " + round.getHand() +
+                                   ", Pos: " + round.getPlayerPosition() +
+                                   ", Raise: " + round.getCurrentRaise() +
+                                   ", Econ: " + (round.getStrongEconomy() ? "Strong" : "Weak") + " ---");
+
+                // 1. Postavi Globale koje FOLD DRL ZAHTEVA
+                kSession.setGlobal("handEvalService", handEvalQueryService);
+                kSession.setGlobal("handService", handService); // (Za isTableAggressive)
+                kSession.setGlobal("min_bigger_raise", 0.2);
+                kSession.setGlobal("min_bigger_raise_blinds", 5);
+                kSession.setGlobal("bad_position_treshold", 2);
+
+                // 2. Ubaci činjenicu
+                kSession.insert(round);
+
+                // 3. Postavi fokus na FOLD activation-group
+                kSession.getAgenda().getAgendaGroup("fold_decision").setFocus();
+
+                // 4. Pokreni pravila
+                int rulesFired = kSession.fireAllRules();
+
+                
+                if(round.getSuggestedAction()!= null){
+                    System.out.println(round.getSuggestedAction());
+                }
+
+            } finally {
+                // 5. Obavezno uništi sesiju
+                kSession.dispose();
+            }
+        }
+    }
+
     // Metoda fireRulesBackwards() je obrisana.
     
     public void generateRules() {

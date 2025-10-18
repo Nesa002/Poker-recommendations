@@ -30,6 +30,9 @@ public class Round {
     private int bigBlindSize;
 
 
+    private String suggestedAction = "Joe";
+
+
      // Updated constructor
      public Round(String hand, int currentRoundNum, int playerPosition, String[] players, Integer[] playerChips, int currentRaise, int pot, int bigBlindSize) {
         this.hand = hand;
@@ -131,6 +134,14 @@ public class Round {
 
     public void setPlayerName(String playerName) {
         this.playerName = playerName;
+    }
+
+    public String getSuggestedAction() {
+        return suggestedAction;
+    }
+
+    public void setSuggestedAction(String suggestedAction) {
+        this.suggestedAction = suggestedAction;
     }
 
     @Override
