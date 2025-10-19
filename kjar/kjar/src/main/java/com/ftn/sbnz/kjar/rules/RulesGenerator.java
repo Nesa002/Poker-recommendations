@@ -22,12 +22,17 @@ public class RulesGenerator {
     public static void generateDRL() throws Exception {
         ClassLoader classLoader = RulesGenerator.class.getClassLoader();
 
-        // Globals
         InputStream globalsStream = classLoader.getResourceAsStream("rules/template/globals.drl");
         if (globalsStream == null) {
             throw new RuntimeException("Globals file not found!");
         }
         String globals = new String(globalsStream.readAllBytes(), StandardCharsets.UTF_8);
+
+        globalsStream = classLoader.getResourceAsStream("rules/template/globals_fold.drl");
+        if (globalsStream == null) {
+            throw new RuntimeException("Globals file not found!");
+        }
+        String globals_fold = new String(globalsStream.readAllBytes(), StandardCharsets.UTF_8);
 
         // Forward rules
         generateDRLForTemplate(
@@ -44,7 +49,7 @@ public class RulesGenerator {
                 "rules/template/fold_template.drl",
                 "rules/template/fold_data.csv",
                 "fold",
-                globals
+                globals_fold
         );
     }
 

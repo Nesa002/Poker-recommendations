@@ -1,0 +1,124 @@
+body {
+  font-family: sans-serif;
+}
+
+.container {
+  max-width: 700px;
+  margin: 20px auto;
+  padding: 20px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  background-color: #f9f9f9;
+}
+
+.setup-section div, .card-selection {
+  margin-bottom: 15px;
+}
+
+label {
+  display: inline-block;
+  width: 200px; /* Podesi širinu labele */
+  margin-right: 10px;
+  vertical-align: middle;
+}
+
+input[type="number"], select {
+  padding: 8px;
+  width: 80px; /* Podesi širinu inputa */
+  margin-right: 5px;
+  vertical-align: middle;
+}
+
+input[type="checkbox"] {
+  vertical-align: middle;
+}
+
+.suited-label {
+  width: auto; /* Da ne zauzima celu širinu */
+}
+
+button {
+  padding: 10px 20px;
+  cursor: pointer;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  margin-top: 10px;
+}
+
+button:hover {
+  background-color: #0056b3;
+}
+
+.error-message {
+  color: red;
+  margin-top: 15px;
+  font-weight: bold;
+}
+
+.game-section {
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid #eee;
+}
+
+.game-section h2, .game-section h3 {
+  color: #333;
+}
+
+ul {
+  list-style: none;
+  padding: 0;
+}
+
+li {
+  margin-bottom: 5px;
+}
+
+hr {
+    margin-top: 20px;
+}
+
+.bet-info {
+  font-size: 0.9em;
+  color: #555;
+  margin-left: 10px;
+}
+
+.game-section ul li {
+  padding: 3px 0;
+}
+
+.current-player {
+  font-weight: bold;
+  color: #007bff; /* Plava boja za trenutnog igrača */
+}
+
+.folded-player {
+  color: #999;
+  text-decoration: line-through; /* Precrtaj foldovane */
+}
+
+.action-section {
+    margin-top: 20px;
+    padding: 15px;
+    border: 1px solid #ddd;
+    background-color: #fff;
+}
+
+.action-section select, .action-section input[type="number"] {
+    margin-right: 10px;
+}
+
+.winner-section {
+    margin-top: 20px;
+    padding-top: 15px;
+    border-top: 1px dashed #ccc;
+}
+
+.log-message {
+    margin-top: 10px;
+    font-size: 0.9em;
+    color: #666;
+}
