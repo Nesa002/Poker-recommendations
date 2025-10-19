@@ -33,7 +33,11 @@ public class Round {
     private String suggestedAction = "Joe";
 
 
-     // Updated constructor
+    public Round() {
+        this.playerActions = new HashMap<>();
+        this.playerChips = new HashMap<>();
+    }
+
      public Round(String hand, int currentRoundNum, int playerPosition, String[] players, Integer[] playerChips, int currentRaise, int pot, int bigBlindSize) {
         this.hand = hand;
         this.roundNum = currentRoundNum + 1;

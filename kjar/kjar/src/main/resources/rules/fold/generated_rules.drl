@@ -1,4 +1,4 @@
-package rules.forward
+package rules.fold
 
 import com.ftn.sbnz.model.models.Round;
 import com.ftn.sbnz.service.services.HandService;
